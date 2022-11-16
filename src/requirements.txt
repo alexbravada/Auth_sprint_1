@@ -1,0 +1,12 @@
+Flask==2.2.2
+gevent==22.10.1
+flask-jwt-extended[asymmetric_crypto]
+SQLAlchemy==1.4.42
+psycopg2-binary==2.9.4
+alembic==1.8.1
+python-dotenv==0.21.0
+pydantic==1.10.2
+orjson==3.8.1
+redis==4.3.4
+mimesis==6.1.1
+pytest
