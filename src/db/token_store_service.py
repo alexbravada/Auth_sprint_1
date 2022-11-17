@@ -3,16 +3,12 @@ import time
 from functools import lru_cache
 
 import redis
-from db.redis_base import RedisStorage
 from db.redis_base import AbstractCacheStorage
 from db.redis_base import get_redis
 
 
-#class TokenStoreService(RedisStorage):
 class TokenStoreService:
     def __init__(self, storage: AbstractCacheStorage):
-        #self.storage: AbstractCacheStorage = super().__init__()
-        #self.storage = RedisStorage(conn = get_redis())
         self.storage = storage
     def add_to_blacklist(self, token: str, value: str = "True", expired: int = 600):
         self.storage.set(token, value=value, ex=datetime.timedelta(seconds=expired))

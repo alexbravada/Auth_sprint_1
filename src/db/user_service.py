@@ -34,10 +34,7 @@ class UserService(PostgresService):
         with Session(self.engine) as session:
             user = ''
             try:
-                # user = session.query(User.email==email).one()
                 user = session.query(User).filter(User.email == email).one()
-                print(user, "!!!!!!!!!!!!!!!!")
-                print('abssssssssssssssssssssssssssssssssssssssss\n\n\n\n\n\n\n\n\n')
                 d = self._row_to_dict(user)
                 if user and check_password_hash(user.password, password):
                     output = UserOutput(**d)
@@ -96,15 +93,10 @@ class UserService(PostgresService):
             return False, {}
 
     def update_user_from_dict(self, email: str, data: dict):
-        #query = update(self.model).where(self.model.id == id).values(**record)
         with Session(self.engine) as session:
             user = ''
         try:
             user = session.query(User).filter(User.email == email).one().values(**data)
-            #user = session.query(User).update({Stuff.foo: Stuff.foo + 1})
-            #media = Media(id=123, title="Titular Line", slug="titular-line", type="movie")
-            #media.update()
-            print('uusssssssssssrrrrrrfsfsfa', user)
             if user:
                 d = self._row_to_dict(user)
                 output = UserOutput(**d)

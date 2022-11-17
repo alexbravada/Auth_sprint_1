@@ -1,7 +1,6 @@
 from flask import Blueprint
 from .v1 import v1_blueprint
 
-#app.register_blueprint()
 
 api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
