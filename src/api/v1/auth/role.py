@@ -34,9 +34,7 @@ def add_role(token_store_service: AbstractCacheStorage = get_token_store_service
     iat = payload.get('iat')
     blacklist = token_store_service.check_blacklist(access_token)
     expired = token_store_service.check_logout_email_date(email, iat)
-    if not blacklist and not expired:
-        pass
-    else: 
+    if blacklist or expired:
         abort(403)
     if not request.json or not 'name' in request.json:
         abort(400)
@@ -60,9 +58,7 @@ def delete_role(token_store_service: AbstractCacheStorage = get_token_store_serv
     iat = payload.get('iat')
     blacklist = token_store_service.check_blacklist(access_token)
     expired = token_store_service.check_logout_email_date(email, iat)
-    if not blacklist and not expired:
-        pass
-    else: 
+    if blacklist or expired:
         abort(403)
     if not request.json or not 'id' in request.json:
         abort(400)
@@ -85,9 +81,7 @@ def show_roles_all(token_store_service: AbstractCacheStorage = get_token_store_s
     iat = payload.get('iat')
     blacklist = token_store_service.check_blacklist(access_token)
     expired = token_store_service.check_logout_email_date(email, iat)
-    if not blacklist and not expired:
-        pass
-    else: 
+    if blacklist or expired:
         abort(403)
     db = RoleService()
     response_inner = [x.as_dict for x in db.show_all_roles()]
@@ -106,9 +100,7 @@ def show_role(role_id, token_store_service: AbstractCacheStorage = get_token_sto
     iat = payload.get('iat')
     blacklist = token_store_service.check_blacklist(access_token)
     expired = token_store_service.check_logout_email_date(email, iat)
-    if not blacklist and not expired:
-        pass
-    else: 
+    if blacklist or expired:
         abort(403)
     db = RoleService()
     response_inner = [db.show_role(role_id).as_dict]
@@ -127,9 +119,7 @@ def update_role(token_store_service: AbstractCacheStorage = get_token_store_serv
     iat = payload.get('iat')
     blacklist = token_store_service.check_blacklist(access_token)
     expired = token_store_service.check_logout_email_date(email, iat)
-    if not blacklist and not expired:
-        pass
-    else: 
+    if blacklist or expired:
         abort(403)
     if not request.json or not 'id' in request.json:
         abort(400)

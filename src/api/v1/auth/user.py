@@ -24,13 +24,12 @@ def sign_in():
         data = {'email': 'Alice', 'password': 'ChangeMe'}
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     '''
-    result = request.json # or result = request.get_json(force=True)
+    result = request.json
     email = result.get('email')
     password = result.get('password')
     if not email or not password:
         return jsonify({'error': 'email & password require'}), 401
     db = UserService()
-    print('bla bla bla')
     res, payload = db.login(email, password)
     if not res:
         return jsonify({"error": "Invalid email or password"}), 401
@@ -59,8 +58,7 @@ def sign_up():
     print('resp sttttttaaaa: ', response.get('status'))
     if response.get('status') == '201':
         return jsonify(response), 201
-    else: 
-        return jsonify(response), 403
+    return jsonify(response), 403
 
 
 @user_bp.route('/logout', methods=['POST'])
@@ -75,7 +73,6 @@ def logout(token_store_service: AbstractCacheStorage = get_token_store_service()
     print('refresh from logout', refresh_token)
     refresh_ttl = refresh_exp - now
     if refresh_ttl > 0:
-        #ttl = datetime.timedelta(seconds=total)
         token_store_service.add_to_blacklist(refresh_token, expired=refresh_ttl)
     token_store_service.add_to_blacklist(access_token, expired=600)
     print('zapisal')
@@ -83,8 +80,8 @@ def logout(token_store_service: AbstractCacheStorage = get_token_store_service()
     print('check refresh', token_store_service.check_blacklist(refresh_token))
     print('check access', token_store_service.check_blacklist(access_token))
     print('chech random', token_store_service.check_blacklist("random key"))
-    #return {"token": str(token_in)}
     return jsonify(token_in), 200
+
 
 @user_bp.route('/logout_all', methods=['POST'])
 @jwt_required(locations=['headers'])
@@ -114,8 +111,7 @@ def change_password():
     if res:
         status['status'] = res
         return jsonify(status), 200
-    else:
-        return jsonify(status), 401
+    return jsonify(status), 401
 
 
 @user_bp.route('/change_email', methods=['POST'])
@@ -128,19 +124,15 @@ def change_pwd(token_store_service: AbstractCacheStorage = get_token_store_servi
     old_access_token = request.headers['Authorization']
     jwt = get_jwt()
     email = jwt.get('email')
-    #email = request.json.get('email')
     password = request.json.get('password')
     new_email = request.json.get('new_email')
-    # TODO validate_new_email()
     db = UserService()
-    # если да, то установить новый пароль пользователю.
     res, _ = db.change_email(email=email, password=password, new_email=new_email)
     if res:
-        reponse['status'] = res
+        response['status'] = res
         token_store_service.add_to_blacklist(old_access_token)
-        return jsonify(reponse), 200
-    else:
-        return jsonify(reponse), 401
+        return jsonify(response), 200
+    return jsonify(response), 401
 
 
 @user_bp.route('/access', methods=['POST'])
@@ -150,7 +142,6 @@ def access(token_store_service: AbstractCacheStorage = get_token_store_service()
     payload = get_jwt()
     email = payload.get('email')
     iat = payload.get('iat')
-    print(type(iat))
     token = request.headers['Authorization'].split()[1]
     print('eto timestamp', payload.get('exp'))
     print('eto payload email', payload.get('email'))
@@ -158,8 +149,7 @@ def access(token_store_service: AbstractCacheStorage = get_token_store_service()
     expired = token_store_service.check_logout_email_date(email=email, iat=iat)
     if not blacklist and not expired:
         return jsonify({'access': True}), 200
-    else:
-        return jsonify({'access': False, 'msg': 'Access Token expired'}), 403
+    return jsonify({'access': False, 'msg': 'Access Token expired'}), 403
 
 
 @user_bp.route('/refresh', methods=['POST'])
