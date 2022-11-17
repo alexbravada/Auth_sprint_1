@@ -28,9 +28,3 @@ class UserOutput(BaseOrjsonModel):
     is_active: bool
     is_verified: bool
     is_admin: bool
-
-
-'''{'id': 1, 'created': datetime.datetime(2022, 11, 7, 14, 14, 27, 547219),
- 'modified': None, 'email': 'test_user', 'first_name': None, 'last_name': None,
-  'password': '',
- 'is_active': True, 'is_verified': False}'''

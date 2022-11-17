@@ -35,18 +35,3 @@ class Settings(BaseSettings):
         env_file = 'dev.env'
         env_file_encoding = 'utf-8'
         env_nested_delimiter = '_'
-
-
-
-'''docker run -d \
-  --name flask-postgres \
-  -p 5432:5432 \
-  -v $HOME/postgresql/flask_data:/var/lib/postgresql/flask_volume_data \
-  -e POSTGRES_PASSWORD=123qwe \
-  -e POSTGRES_USER=user \
-  -e POSTGRES_DB=db_users  \
-  postgres:13 '''
-
-'''
-psql -h 127.0.0.1 -U user -d db_users
-'''
