@@ -1,0 +1,41 @@
+version: '3'
+
+volumes:
+  postgres_data:
+
+services:
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+
+  redis:
+    image: redis:6.0.9
+    restart: on-failure
+
+  auth_service:
+    build: auth_service
+    env_file:
+      - .env
+    expose:
+      - "8005"
+    depends_on:
+      - redis
+      - db
+
+  nginx:
+    container_name: nginx-container
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config:/etc/nginx/conf.d:ro
+      - ./data:/data/:ro
+    depends_on:
+      - db
+      - redis
+      - auth_service
+    ports:
+      - "8005:80"
