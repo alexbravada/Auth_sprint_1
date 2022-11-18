@@ -71,7 +71,7 @@ http://localhost:5000/
 - Получение роли по идентификатору: **GET /api/v1/auth/role/<int:role_id>**
 - Изменение роли по ее идентификатору в теле зарпоса: **PATCH /api/v1/auth/role/update**
 
-- Управление авторизацией:
+Управление авторизацией:
 
 - Авторизация пользователя: **POST /api/v1/auth/user/signin**
 - Создание пользователя: **POST /api/v1/auth/user/signup**
