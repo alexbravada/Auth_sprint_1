@@ -5,13 +5,14 @@ import requests
 import pytest
 from mimesis import Person
 
-from src.db.role_service import RoleService
+from db.role_service import RoleService
 
+HOST = 'http://127.0.0.1:80'
 
 @pytest.fixture()
 def login() -> dict:
     headers = {"Content-Type": "application/json; charset=utf-8"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/signin'
+    url = f'{HOST}/api/v1/auth/user/signin'
     data = {'email': 'northeast1802@yahoo.com', 'password': 'test'}
     response = requests.post(url=url,
                              json=data,
@@ -23,32 +24,19 @@ def login() -> dict:
 @pytest.fixture()
 def login_changeemail() -> dict:
     headers = {"Content-Type": "application/json; charset=utf-8"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/signin'
-    data = {'email': 'northeast1802@yahoo.com', 'password': 'test'}
+    url = f'{HOST}/api/v1/auth/user/signin'
+    data = {'email': 'test', 'password': 'test'}
     response = requests.post(url=url,
                              json=data,
                              headers=headers
                              )
-    _ = dict(response.json())
-
-    yield _
-
-    # data_rollback = {
-    #     'password': 'test',
-    #     'new_email': 'test'
-    # }
-    # headers_rollback = {"Content-Type": "application/json; charset=utf-8",
-    #                     "Authorization": f"Bearer {_.get('access_token')}"}
-    # requests.post(url=url,
-    #               headers=headers_rollback,
-    #               json=data_rollback
-    #               )
+    return dict(response.json())
 
 
 @pytest.fixture()
 def login_admin() -> dict:
     headers = {"Content-Type": "application/json; charset=utf-8"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/signin'
+    url = f'{HOST}/api/v1/auth/user/signin'
     data = {'email': 'admin', 'password': 'admin'}
     response = requests.post(url=url,
                              json=data,

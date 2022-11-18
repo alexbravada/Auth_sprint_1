@@ -6,6 +6,7 @@ volumes:
 services:
 
   db:
+    container_name: db-auth
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -13,11 +14,13 @@ services:
       - .env
 
   redis:
+    container_name: redis-auth
     image: redis:6.0.9
     restart: on-failure
 
   auth_service:
-    build: auth_service
+    container_name: service-auth
+    build: ./src
     env_file:
       - .env
     expose:
@@ -25,17 +28,18 @@ services:
     depends_on:
       - redis
       - db
+    links:
+      - db
 
   nginx:
-    container_name: nginx-container
+    container_name: auth-nginx
     image: nginx:latest
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./config:/etc/nginx/conf.d:ro
-      - ./data:/data/:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/config:/etc/nginx/conf.d:ro
     depends_on:
       - db
       - redis
       - auth_service
     ports:
-      - "8005:80"
+      - "80:80"
