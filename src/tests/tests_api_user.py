@@ -1,7 +1,9 @@
 import random
 import requests
+
 from mimesis import Person
 
+from conftest import HOST
 
 def test_signup_valid_data():
     '''
@@ -9,7 +11,7 @@ def test_signup_valid_data():
     '''
     mimerand = Person()
     headers = {"Content-Type": "application/json; charset=utf-8"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/signup'
+    url = f'{HOST}/api/v1/auth/user/signup'
     data = {'email': mimerand.email(unique=True), 'password': str(random.randint(0, 65536)),
             'first_name': mimerand.first_name(), 'last_name': mimerand.last_name()}
     response = requests.post(url=url,
@@ -22,7 +24,7 @@ def test_signup_valid_data():
 def test_signin_valid_data():
     mimerand = Person()
     headers = {"Content-Type": "application/json; charset=utf-8"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/signin'
+    url = f'{HOST}/api/v1/auth/user/signin'
     data = {'email': 'test', 'password': 'test'}
     response = requests.post(url=url,
                              json=data,
@@ -34,7 +36,7 @@ def test_signin_valid_data():
 def test_logout(login):
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login.get('refresh_token')}"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/logout'
+    url = f'{HOST}/api/v1/auth/user/logout'
     data = {'access_token': login.get('access_token')}
     response = requests.post(url=url,
                              json=data,
@@ -46,7 +48,7 @@ def test_logout(login):
 def test_logout_all(login):
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login.get('access_token')}"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/logout_all'
+    url = f'{HOST}/api/v1/auth/user/logout_all'
     response = requests.post(url=url,
                              headers=headers
                              )
@@ -57,7 +59,7 @@ def test_change_password(login):
     mimerand = Person()
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login.get('access_token')}"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/change_password'
+    url = f'{HOST}/api/v1/auth/user/change_password'
     new_pass = mimerand.password()
     data = {
         'email': 'test',
@@ -84,7 +86,7 @@ def test_change_password(login):
 def test_access(login):
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login.get('access_token')}"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/access'
+    url = f'{HOST}/api/v1/auth/user/access'
     response = requests.post(url=url,
                              headers=headers,
                              )
@@ -94,7 +96,7 @@ def test_access(login):
 def test_get_refresh(login):
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login.get('refresh_token')}"}
-    url = 'http://127.0.0.1:5000/api/v1/auth/user/refresh'
+    url = f'{HOST}/api/v1/auth/user/refresh'
     data = {'access_token': login.get('access_token')}
     response = requests.post(url=url,
                              json=data,
