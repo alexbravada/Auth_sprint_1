@@ -11,12 +11,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
-from config.settings import Settings
 
+from config.settings import Settings
 
 settings = Settings()
 
-db_connection_string = settings.PG_CONNECT_STRING # 'postgresql+psycopg2://user:123qwe@0.0.0.0:5432/db_users'
+db_connection_string = settings.PG_CONNECT_STRING
 engine = create_engine(
     db_connection_string,
     isolation_level="REPEATABLE READ",
@@ -40,6 +40,7 @@ class DefaultMixin:
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class LoginRecord(DefaultMixin, Base):
     __tablename__ = 'login_history'
     login_time = Column(DateTime(), nullable=False)
@@ -59,6 +60,7 @@ class User(DefaultMixin, Base):
     password = Column(String(512), nullable=False)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
 
     login_records = relationship('LoginRecord')
     roles = relationship('UserRole', backref='user')
