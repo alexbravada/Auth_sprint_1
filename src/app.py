@@ -1,26 +1,34 @@
 from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
+import click
+from flask.cli import with_appcontext
 
-
+from db.user_service import UserService
 from api import api_blueprint
-
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'changeme'
-#SECRET_KEY = 'changeme'
 jwt = JWTManager(app)
-
-# 'FLASK_APP=wsgi_app flask run --with-threads --reload'
-
 
 app.register_blueprint(api_blueprint)
 
 
 @app.route('/')
 def get_docs():
-    print('sending docs')
     return render_template('swaggerui.html')
 
+
+@click.command(name='createsuperuser')
+@click.argument('email')
+@click.argument('password')
+@with_appcontext
+def create_admin(email, password):
+    db = UserService()
+    db.admin_register(email=email,
+                      password=password)
+
+
+app.cli.add_command(create_admin)
 
 if __name__ == '__main__':
     app.run(
