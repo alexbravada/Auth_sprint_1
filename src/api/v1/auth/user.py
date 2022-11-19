@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from db.user_service import UserService
 from db.redis_base import AbstractCacheStorage
 from db.token_store_service import get_token_store_service
+from src.db.pg_base import PostgresService
 
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
@@ -52,10 +53,8 @@ def sign_up():
     password = result.get('password')
     first_name = result.get('first_name')
     last_name = result.get('last_name')
-    print(email)
     db = UserService()
     response = db.register(email, password, first_name, last_name)
-    print('resp sttttttaaaa: ', response.get('status'))
     if response.get('status') == '201':
         return jsonify(response), 201
     return jsonify(response), 403
@@ -70,16 +69,11 @@ def logout(token_store_service: AbstractCacheStorage = get_token_store_service()
     now = round(time.time())
     refresh_exp = jwt.get('exp')
     refresh_token = request.headers['Authorization'].split()[1]
-    print('refresh from logout', refresh_token)
     refresh_ttl = refresh_exp - now
     if refresh_ttl > 0:
         token_store_service.add_to_blacklist(refresh_token, expired=refresh_ttl)
     token_store_service.add_to_blacklist(access_token, expired=600)
-    print('zapisal')
     token_in = token_store_service.check_blacklist(refresh_token)
-    print('check refresh', token_store_service.check_blacklist(refresh_token))
-    print('check access', token_store_service.check_blacklist(access_token))
-    print('chech random', token_store_service.check_blacklist("random key"))
     return jsonify(token_in), 200
 
 
@@ -143,8 +137,6 @@ def access(token_store_service: AbstractCacheStorage = get_token_store_service()
     email = payload.get('email')
     iat = payload.get('iat')
     token = request.headers['Authorization'].split()[1]
-    print('eto timestamp', payload.get('exp'))
-    print('eto payload email', payload.get('email'))
     blacklist = token_store_service.check_blacklist(token)
     expired = token_store_service.check_logout_email_date(email=email, iat=iat)
     if not blacklist and not expired:
@@ -157,7 +149,6 @@ def access(token_store_service: AbstractCacheStorage = get_token_store_service()
 def get_refresh(token_store_service: AbstractCacheStorage = get_token_store_service()):
     ''' curl -X POST -H "Authorization: Bearer <refresh_token>" -H "Content-Type: application/json" -d '{"access_token": "token"}' http://127.0.0.1:5000/api/v1/auth/user/refresh
     '''
-    print(get_jwt())
     #print('eto Refresh TOK', request.headers['Authorization'])
     old_refresh_token = request.headers['Authorization'].split()[1]
     old_access_token = request.json.get('access_token')
@@ -179,3 +170,21 @@ def get_refresh(token_store_service: AbstractCacheStorage = get_token_store_serv
     response['access_token'] = access_token
     response['refresh_token'] = refresh_token
     return jsonify(response), 200
+
+
+@user_bp.route('/auth_history', methods=['POST'])
+@jwt_required(locations=['headers'])
+def access(token_store_service: AbstractCacheStorage = get_token_store_service()):
+    ''' curl -X POST -H "Authorization: Bearer <access_token>" http://127.0.0.1:5000/api/v1/auth/user/access'''
+    payload = get_jwt()
+    user_id = payload.get('id')
+    email = payload.get('email')
+    iat = payload.get('iat')
+    token = request.headers['Authorization'].split()[1]
+    blacklist = token_store_service.check_blacklist(token)
+    expired = token_store_service.check_logout_email_date(email=email, iat=iat)
+    if not blacklist and not expired:
+        db = UserService()
+        _, output = db.get_auth_history(user_id)
+        return jsonify(output), 200
+    return jsonify({'auth': False, 'msg': 'Access Token expired'}), 403

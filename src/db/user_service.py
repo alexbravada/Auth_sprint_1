@@ -1,5 +1,5 @@
 from db.pg_base import PostgresService
-from models.user import User
+from models.user import User, LoginRecord
 from models.pydantic_classes import UserOutput
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -114,6 +114,19 @@ class UserService(PostgresService):
                 return True, output
         except NoResultFound:
             return False, {}
+
+    def get_auth_history(self, user_id: int):
+        with Session(self.engine) as session:
+            user_history = ''
+        try:
+            output = dict()
+            user_history = session.query(LoginRecord).filter(LoginRecord.user_id == user_id).one()
+            for agent in user_history:
+                output[agent.useragent] = agent.login_time
+            return True, output
+        except NoResultFound:
+            return False, {}
+
 
     def _row_to_dict(self, row) -> dict:
         d = {}
