@@ -112,8 +112,6 @@ class RoleService(PostgresService):
 
     def user_remove_role(self, user_id, role_id):
         with Session(self.engine) as session:
-            # можно и нужно доработать каскадное удаление (через модели) и
-            # этот метод можно будет использовать только для очистки старых записей
             if not user_id or not role_id:  # check if user_id or role_id presented in request
                 abort(400)
             try:
