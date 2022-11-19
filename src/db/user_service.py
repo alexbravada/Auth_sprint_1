@@ -7,27 +7,39 @@ from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Tuple
 
+
 class UserService(PostgresService):
     def __init__(self):
         super().__init__()
+
+    def admin_register(self, email, password, first_name=None, last_name=None):
+        with Session(self.engine) as session:
+            try:
+                admin = session.query(User).filter(User.email == email).one()
+                if admin:
+                    return {'msg': 'User with that email has been exist'}
+            except MultipleResultsFound:
+                return {'msg': 'User with that email has been exist'}
+            except NoResultFound:
+                admin = User(email=email, password=generate_password_hash(password), first_name=first_name,
+                             last_name=last_name, is_admin=True)
+                session.add(admin)
+                session.commit()
+                return {'msg': 'superuser created'}
 
     def register(self, email, password, first_name=None, last_name=None):
         with Session(self.engine) as session:
             try:
                 user = session.query(User).filter(User.email == email).one()
-                print(f'\n\n\n\n\nUSER {user}\n\n\n')
                 if user:
                     return {"status": "403", "msg": "account with that email has been used"}
             except MultipleResultsFound as e:
-                print(e)
                 return {"status": "403", "msg": "account with that email has been used"}
             except NoResultFound as e:
-                print(e)
-                print('email not registered')
-                user = User(email=email, password=generate_password_hash(password), first_name=first_name, last_name=last_name)
+                user = User(email=email, password=generate_password_hash(password), first_name=first_name,
+                            last_name=last_name)
                 session.add(user)
                 session.commit()
-            print('after commit')
             return {"status": "201"}
 
     def login(self, email, password) -> Tuple[bool, dict]:
@@ -39,12 +51,10 @@ class UserService(PostgresService):
                 if user and check_password_hash(user.password, password):
                     output = UserOutput(**d)
                     output = dict(output)
-                    return True, output # output для payload
+                    return True, output  # output для payload
                 return False, {}
             except NoResultFound as ee:
-                print('\n\n\n\n', ee, '\n\n\n\n', user)
                 return False, {}
-
 
     def get_user_payload(self, email):
         with Session(self.engine) as session:
@@ -59,7 +69,6 @@ class UserService(PostgresService):
                 return output
         except NoResultFound:
             return False
-
 
     def change_pwd(self, email: str, old_password: str, new_password: str) -> bool:
         with Session(self.engine) as session:
