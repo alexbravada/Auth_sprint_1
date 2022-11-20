@@ -10,3 +10,5 @@ orjson==3.8.1
 redis==4.3.4
 mimesis==6.1.1
 pytest
+requests
+flask-migrate==4.0.0
