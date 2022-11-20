@@ -5,7 +5,7 @@ import requests
 import pytest
 from mimesis import Person
 
-from db.role_service import RoleService
+from src.db.role_service import RoleService
 
 HOST = 'http://127.0.0.1:80'
 
