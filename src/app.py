@@ -18,7 +18,7 @@ def get_docs():
     return render_template('swaggerui.html')
 
 
-@click.command(name='createsuperuser')
+@click.command(name='create-superuser')
 @click.argument('email')
 @click.argument('password')
 @with_appcontext
