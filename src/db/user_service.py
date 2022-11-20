@@ -75,7 +75,7 @@ class UserService(PostgresService):
                     session.close()
                     return output
             except NoResultFound:
-                return False
+                abort(400)
 
     def change_pwd(self, email: str, old_password: str, new_password: str) -> bool:
         with Session(self.engine) as session:
@@ -120,7 +120,7 @@ class UserService(PostgresService):
                 output = dict()
                 user_history = session.query(LoginRecord).filter(LoginRecord.user_id == user_id).all()
                 for eachrow in user_history:
-                    output[eachrow.login_time] = eachrow.useragent
+                    output[str(eachrow.login_time)] = eachrow.useragent
                 return output
             except NoResultFound:
                 abort(404)

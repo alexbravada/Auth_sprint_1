@@ -113,6 +113,8 @@ def get_refresh():
 @user_bp.route('/login_history', methods=['GET'])
 @jwt_required(locations=['headers'])
 @token_validation(request)
-def get_login_history(user_id):
+def get_login_history():
     db = UserService()
-    return jsonify({'login history': db.get_auth_history(user_id)})
+    token = get_jwt()
+    user_id = token.get('id')
+    return jsonify({'login history': [db.get_auth_history(user_id)]})

@@ -5,7 +5,7 @@ from flask import request
 from flask import jsonify
 from flask import make_response
 from flask import abort
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required
 
 from db.role_service import RoleService
 from .service import admin_required, token_validation

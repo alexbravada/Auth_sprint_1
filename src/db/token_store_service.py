@@ -10,16 +10,14 @@ from db.redis_base import get_redis
 class TokenStoreService:
     def __init__(self, storage: AbstractCacheStorage):
         self.storage = storage
+
     def add_to_blacklist(self, token: str, value: str = "True", expired: int = 600):
         self.storage.set(token, value=value, ex=datetime.timedelta(seconds=expired))
 
     def check_blacklist(self, token) -> str:
-        res = self.storage.get(token)
-        print(token)
-        print('from blacklist', res)
-        return res
+        return self.storage.get(token)
 
-    def logout_all(self, email: str, iat = round(time.time()), expired: int = 2600000):
+    def logout_all(self, email: str, iat=round(time.time()), expired: int = 2600000):
         print('logout_all')
         print(email, iat)
         self.storage.set(email, value=str(iat), ex=datetime.timedelta(seconds=int(expired)))
@@ -31,12 +29,12 @@ class TokenStoreService:
         print(f'date {date} iat {iat}')
         if date and iat <= int(date):
             return True
-        else: 
+        else:
             return False
 
 
 @lru_cache()
 def get_token_store_service(
-    storage: redis.Redis = get_redis()
+        storage: redis.Redis = get_redis()
 ) -> TokenStoreService:
-    return TokenStoreService(storage) 
+    return TokenStoreService(storage)
