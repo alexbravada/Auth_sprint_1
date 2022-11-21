@@ -18,15 +18,12 @@ class TokenStoreService:
         return self.storage.get(token)
 
     def logout_all(self, email: str, iat=round(time.time()), expired: int = 2600000):
-        print('logout_all')
-        print(email, iat)
         self.storage.set(email, value=str(iat), ex=datetime.timedelta(seconds=int(expired)))
 
     def check_logout_email_date(self, email: str, iat) -> bool:
         '''returns False if token is blocked
             else -> True'''
         date = self.check_blacklist(email)
-        print(f'date {date} iat {iat}')
         if date and iat <= int(date):
             return True
         else:

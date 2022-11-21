@@ -9,8 +9,6 @@ def sign_up(email, password):
     data = {"email": email, "password":password}
     headers = {'Content-type': 'application/json'}
     response = requests.post(url, json=data, headers=headers)
-    print(response.json())
-    # print(response.status_code)
     return f'sing_up status: {response.status_code}'
 
 
@@ -20,8 +18,6 @@ def sign_in(email, password):
     data = {"email": email, "password":password}
     headers = {'Content-type': 'application/json'}
     response = requests.post(url, json=data, headers=headers)
-    print(response.json())
-    #print(response.status_code)
     return f'sing_in status: {response.status_code}'
 
 
@@ -36,13 +32,9 @@ def start_test():
     which = input('1 - reg and loging\n2 - login\nInput: ')
     email=input('email: ')
     password=input('password: ')
-    print(type(email), type(password))
     if int(which) < 2:
         test1 = sign_up(email, password)
-        print('test 1 done:\n   ', test1)
     test2 = sign_in(email, password)
-    print('test 2 done:\n   ', test2)
 
 
-#start_test()
 refresh()
