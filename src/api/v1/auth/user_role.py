@@ -19,12 +19,12 @@ def not_found(error):
 
 
 @user_role_bp.errorhandler(400)
-def not_found(error):
+def bad_request(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.BAD_REQUEST)
 
 
 @user_role_bp.errorhandler(403)
-def not_found(error):
+def forbidden(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.FORBIDDEN)
 
 
@@ -49,8 +49,9 @@ def show_user_role():
 def user_add_role():
     body_validate(request)
     db = RoleService()
-    return jsonify({'user__role created': [db.user_add_role(user_id=request.json.get('user_id'),
-                                                            role_id=request.json.get('role_id')).as_dict]
+    return jsonify({'user__role created':
+                        [db.user_add_role(user_id=request.json.get('user_id'),
+                                          role_id=request.json.get('role_id')).as_dict]
                     }), HTTPStatus.CREATED
 
 
@@ -79,6 +80,7 @@ def role_check_user(role_id):
 def user_role_remove():
     body_validate(request)
     db = RoleService()
-    return jsonify({'user__role deleted': [db.user_remove_role(user_id=request.json.get('user_id'),
-                                                               role_id=request.json.get('role_id')).as_dict]
+    return jsonify({'user__role deleted':
+                        [db.user_remove_role(user_id=request.json.get('user_id'),
+                                             role_id=request.json.get('role_id')).as_dict]
                     }), HTTPStatus.OK

@@ -26,7 +26,8 @@ def admin_required():
     return wrapper
 
 
-def token_validation(request, token_store_service: AbstractCacheStorage = get_token_store_service()):
+def token_validation(request,
+                     token_store_service: AbstractCacheStorage = get_token_store_service()):
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
@@ -49,12 +50,15 @@ def token_validation(request, token_store_service: AbstractCacheStorage = get_to
 def create_login_tokens(email: str, payload: dict) -> tuple[str, str]:
     exp_delta = timedelta(minutes=10)
     exp_refresh_delta = timedelta(days=30)
-    access_token = create_access_token(email, additional_claims=payload, expires_delta=exp_delta)
-    refresh_token = create_refresh_token(email, additional_claims=payload, expires_delta=exp_refresh_delta)
+    access_token = create_access_token(
+        email, additional_claims=payload, expires_delta=exp_delta)
+    refresh_token = create_refresh_token(
+        email, additional_claims=payload, expires_delta=exp_refresh_delta)
     return access_token, refresh_token
 
 
-def logout_service(request, token_store_service: AbstractCacheStorage = get_token_store_service()) -> str:
+def logout_service(request,
+                   token_store_service: AbstractCacheStorage = get_token_store_service()) -> str:
     access_token = request.json.get('access_token')
     jwt = get_jwt()
     now = round(time.time())
@@ -67,7 +71,8 @@ def logout_service(request, token_store_service: AbstractCacheStorage = get_toke
     return token_store_service.check_blacklist(refresh_token)
 
 
-def logout_all_service(token, token_store_service: AbstractCacheStorage = get_token_store_service()) -> str:
+def logout_all_service(token,
+                       token_store_service: AbstractCacheStorage = get_token_store_service()) -> str:
     email = token.get('email')
     iat = token.get('iat')
     exp = token.get('exp')

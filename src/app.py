@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
-import click
 from flask.cli import with_appcontext
+import click
 
 from db.user_service import UserService
 from api import api_blueprint

@@ -1,8 +1,8 @@
-import datetime
-import orjson
-
-from pydantic import BaseModel
 from typing import Optional
+import datetime
+
+import orjson
+from pydantic import BaseModel
 
 
 def orjson_dumps(v, *, default):

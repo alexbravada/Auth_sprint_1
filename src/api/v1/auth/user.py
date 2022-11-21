@@ -10,7 +10,8 @@ from flask_jwt_extended import jwt_required, get_jwt
 from db.user_service import UserService
 from db.redis_base import AbstractCacheStorage
 from db.token_store_service import get_token_store_service
-from .service import create_login_tokens, logout_service, logout_all_service, token_validation, blacklisting_tokens
+from .service import create_login_tokens, logout_service, \
+    logout_all_service, token_validation, blacklisting_tokens
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -21,12 +22,12 @@ def not_found(error):
 
 
 @user_bp.errorhandler(400)
-def not_found(error):
+def bad_request(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.BAD_REQUEST)
 
 
 @user_bp.errorhandler(401)
-def not_found(error):
+def unauthorized(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.UNAUTHORIZED)
 
 
@@ -51,9 +52,11 @@ def sign_in():
 @user_bp.route('/signup', methods=['POST'])
 def sign_up():
     db = UserService()
-    return jsonify({'created': [db.register(email=request.json.get('email'), password=request.json.get('password'),
-                                            first_name=request.json.get('first_name'),
-                                            last_name=request.json.get('last_name')).as_dict]}), HTTPStatus.CREATED
+    return jsonify({'created': [
+        db.register(email=request.json.get('email'), password=request.json.get('password'),
+                    first_name=request.json.get('first_name'),
+                    last_name=request.json.get('last_name')).as_dict
+    ]}), HTTPStatus.CREATED
 
 
 @user_bp.route('/logout', methods=['POST'])
@@ -75,8 +78,10 @@ def change_password():
     jwt = get_jwt()
     db = UserService()
     return jsonify(
-        {'password changed': [db.change_pwd(email=jwt.get('email'), old_password=request.json.get('old_password'),
-                                            new_password=request.json.get('new_password')).as_dict]}), HTTPStatus.OK
+        {'password changed': [
+            db.change_pwd(email=jwt.get('email'), old_password=request.json.get('old_password'),
+                          new_password=request.json.get('new_password')).as_dict
+        ]}), HTTPStatus.OK
 
 
 @user_bp.route('/change_email', methods=['POST'])

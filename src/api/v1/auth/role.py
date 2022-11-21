@@ -6,7 +6,7 @@ from flask import jsonify
 from flask import make_response
 from flask import abort
 
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required
 
 from db.role_service import RoleService
 from .service import admin_required, token_validation
@@ -20,12 +20,12 @@ def not_found(error):
 
 
 @role_bp.errorhandler(400)
-def not_found(error):
+def bad_request(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.BAD_REQUEST)
 
 
 @role_bp.errorhandler(403)
-def not_found(error):
+def forbidden(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.FORBIDDEN)
 
 
@@ -42,7 +42,8 @@ def add_role():
     body_validation(request, request.json.get('name'))
     db = RoleService()
     return jsonify({'role': [db.add_role(name=request.json.get('name'),
-                                         description=request.json.get('description')).as_dict]}), HTTPStatus.CREATED
+                                         description=request.json.get('description')).as_dict]}
+                   ), HTTPStatus.CREATED
 
 
 @role_bp.route('/delete', methods=['DELETE'])
