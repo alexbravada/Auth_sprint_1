@@ -43,6 +43,7 @@ class UserService(PostgresService):
                             last_name=last_name)
                 session.add(user)
                 session.commit()
+                user = session.query(User).filter(User.email == email).one()
                 return user
 
     def login(self, email, password, useragent):

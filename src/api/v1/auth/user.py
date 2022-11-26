@@ -60,12 +60,6 @@ def sign_up():
 
 
 @user_bp.route('/logout', methods=['POST'])
-@jwt_required(refresh=True, locations=['headers'])
-def logout():
-    return jsonify(logout_service(request)), HTTPStatus.OK
-
-
-@user_bp.route('/logout_all', methods=['POST'])
 @jwt_required(locations=['headers'])
 def logout_all():
     token = get_jwt()
