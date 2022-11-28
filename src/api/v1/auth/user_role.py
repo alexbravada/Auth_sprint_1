@@ -10,7 +10,7 @@ from flask_jwt_extended import jwt_required
 from db.role_service import RoleService
 from .service import admin_required, token_validation
 
-user_role_bp = Blueprint('user_role', __name__, url_prefix='/user/role')
+user_role_bp = Blueprint('user_role', __name__, url_prefix='/user_role')
 
 
 @user_role_bp.errorhandler(404)

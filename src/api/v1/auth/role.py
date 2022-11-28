@@ -30,7 +30,7 @@ def forbidden(error):
 
 
 def body_validation(rrequest, param: str):
-    if not rrequest.json or param not in rrequest.json:
+    if not rrequest.json.get(param):
         abort(400)
 
 
@@ -39,7 +39,7 @@ def body_validation(rrequest, param: str):
 @admin_required()
 @token_validation(request)
 def add_role():
-    body_validation(request, request.json.get('name'))
+    body_validation(request, 'name')
     db = RoleService()
     return jsonify({'role': [db.add_role(name=request.json.get('name'),
                                          description=request.json.get('description')).as_dict]}
@@ -51,7 +51,7 @@ def add_role():
 @admin_required()
 @token_validation(request)
 def delete_role():
-    body_validation(request, request.json.get('id'))
+    body_validation(request, 'id')
     db = RoleService()
     return jsonify({'deleted role': [db.del_role(request.json.get('id')).as_dict]}), HTTPStatus.OK
 
@@ -79,7 +79,7 @@ def show_role(role_id):
 @admin_required()
 @token_validation(request)
 def update_role():
-    body_validation(request, request.json.get('id'))
+    body_validation(request, 'id')
     db = RoleService()
     return jsonify({'role updated': [db.update_role(role_id=request.json.get('id'),
                                                     name=request.json.get('name'),
