@@ -59,15 +59,16 @@ def sign_up():
     ]}), HTTPStatus.CREATED
 
 
-@user_bp.route('/logout', methods=['POST'])
+@user_bp.route('/logout', methods=['GET'])
 @jwt_required(locations=['headers'])
 def logout_all():
     token = get_jwt()
     return jsonify({"logout": logout_all_service(token)}), HTTPStatus.OK
 
 
-@user_bp.route('/change_password', methods=['POST'])
+@user_bp.route('/change_password', methods=['PUT'])
 @jwt_required(locations=['headers'])
+@token_validation(request)
 def change_password():
     jwt = get_jwt()
     db = UserService()
@@ -78,10 +79,10 @@ def change_password():
         ]}), HTTPStatus.OK
 
 
-@user_bp.route('/change_email', methods=['POST'])
+@user_bp.route('/change_email', methods=['PUT'])
 @jwt_required(locations=['headers'])
 def change_pwd(token_store_service: AbstractCacheStorage = get_token_store_service()):
-    old_access_token = request.headers['Authorization']
+    old_access_token = request.headers['Authorization'].split()[1]
     jwt = get_jwt()
     db = UserService()
     response_inner = db.change_email(email=jwt.get('email'), password=request.json.get('password'),
@@ -90,7 +91,7 @@ def change_pwd(token_store_service: AbstractCacheStorage = get_token_store_servi
     return jsonify({'email changed': [response_inner]}), HTTPStatus.OK
 
 
-@user_bp.route('/access', methods=['POST'])
+@user_bp.route('/access', methods=['GET'])
 @jwt_required(locations=['headers'])
 @token_validation(request)
 def access():

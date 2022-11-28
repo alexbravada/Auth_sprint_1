@@ -18,9 +18,8 @@ class UserService(PostgresService):
     def admin_register(self, email, password, first_name=None, last_name=None):
         with Session(self.engine) as session:
             try:
-                admin = session.query(User).filter(User.email == email).one()
-                if admin:
-                    return {'msg': 'User with that email has been exist'}
+                session.query(User).filter(User.email == email).one()
+                return {'msg': 'User with that email has been exist'}
             except MultipleResultsFound:
                 return {'msg': 'User with that email has been exist'}
             except NoResultFound:
@@ -85,6 +84,7 @@ class UserService(PostgresService):
                 if user and check_password_hash(user.password, old_password):
                     user.password = generate_password_hash(new_password)
                     session.commit()
+                    user = session.query(User).filter(User.email == email).one()
                     return user
             except NoResultFound:
                 abort(404)
