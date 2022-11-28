@@ -28,3 +28,4 @@ class UserOutput(BaseOrjsonModel):
     is_active: bool
     is_verified: bool
     is_admin: bool
+    password: str
