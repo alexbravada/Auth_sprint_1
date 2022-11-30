@@ -1,15 +1,9 @@
 import datetime
+from typing import Optional
 
-from sqlalchemy import Column
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import DateTime
-from sqlalchemy import Boolean
-from sqlalchemy import MetaData
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint
+from sqlalchemy import Integer, String, DateTime, Boolean, Text, ForeignKey
+from sqlalchemy.orm import declarative_base, backref, relationship
 from sqlalchemy.ext.declarative import declared_attr
 
 from config.settings import Settings
@@ -55,6 +49,7 @@ class LoginRecord(DefaultMixin, Base):
 class User(DefaultMixin, Base):
     __tablename__ = 'user_info'
     email = Column(String(256), unique=True, nullable=False)
+    username = Column(String(256), unique=True, nullable=True)
     first_name = Column(String(256), nullable=True)
     last_name = Column(String(256), nullable=True)
     password = Column(String(512), nullable=False)
@@ -68,9 +63,32 @@ class User(DefaultMixin, Base):
     def __repr__(self):
         return f'User(id={self.id!r}, email={self.email!r})'
 
+    @classmethod
+    def get_user_by_universal_login(cls, username: Optional[str] = None, email: Optional[str] = None):
+        """
+        возвращает первое совпадение фильтра username OR email
+        """
+        return cls.query.filter(or_(cls.username == username, cls.email == email)).first()
+
+
+class SocialAccount(DefaultMixin, Base):
+    __tablename__ = 'social_account'
+    __table_args__ = (UniqueConstraint('social_id', 'social_name', name='social_pk'),)
+
+    user_id = Column(Integer(), ForeignKey('user_info.id'), nullable=False)
+    users = relationship('UserInfo', backref=backref('social_accounts', lazy=True))
+
+    social_id = Column(Text, nullable=False)
+    social_name = Column(Text, nullable=False)
+
+    def __repr__(self):
+        return f'<SocialAccount {self.social_name}:{self.user_id}>'
+
 
 class UserRole(DefaultMixin, Base):
     __tablename__ = 'user__role'
+    __table_args__ = (UniqueConstraint('user_id', 'role_id', name='user__role_pk'),)
+
     user_id = Column(Integer(), ForeignKey('user_info.id'))
     role_id = Column(Integer(), ForeignKey('role.id'))
 
