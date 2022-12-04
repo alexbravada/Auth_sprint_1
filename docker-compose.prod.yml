@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db:
+    container_name: auth-db
+    image: postgres:13.0-alpine
+    env_file:
+      - .env
+
+  redis:
+    container_name: auth-redis
+    image: redis:6.0.9
+    restart: on-failure
+
+  auth_service:
+    container_name: auth-service
+    image: paqquete/auth-service:v1
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+    links:
+      - db
+
+  nginx:
+    container_name: auth-nginx
+    image: paqquete/auth-nginx:v1
+    depends_on:
+      - db
+      - redis
+      - auth_service
+    ports:
+      - "80:80"
