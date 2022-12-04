@@ -76,7 +76,7 @@ class SocialAccount(DefaultMixin, Base):
     __table_args__ = (UniqueConstraint('social_id', 'social_name', name='social_pk'),)
 
     user_id = Column(Integer(), ForeignKey('user_info.id'), nullable=False)
-    users = relationship('UserInfo', backref=backref('social_accounts', lazy=True))
+    users = relationship('User', backref=backref('social_accounts', lazy=True))
 
     social_id = Column(Text, nullable=False)
     social_name = Column(Text, nullable=False)
