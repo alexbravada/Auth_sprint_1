@@ -16,7 +16,7 @@
 2. Запускаем создание докер-образа:
 
 ```
-docker-compose up --build  
+docker-compose -f docker-compose.dev.yml up --build  
 ```
 
 3. Проводим миграции БД. Для этого следует зайти в контейнер с API и запустить миграции через командную строку Flask:
