@@ -22,9 +22,17 @@ class RedisDSN(BaseModel):
     password: str = os.environ.get('REDIS_PASSWORD')
 
 
+class OAuthCredVK(BaseModel):
+    id: str = os.environ.get('VK_OAUTH_ID')
+    secret: str = os.environ.get('VK_OAUTH_SECRET')
+    service_key: str = os.environ.get('VK_OAUTH_SERVICE_KEY')
+
+
 class Settings(BaseSettings):
     PG: PGDSN = PGDSN()
     Redis: RedisDSN = RedisDSN()
+    VK: OAuthCredVK = OAuthCredVK()
     PG_CONNECT_STRING: AnyUrl = f'postgresql+psycopg2://{PG.user}:{PG.password}@{PG.host}:{PG.port}/{PG.dbname}'
     ACCESS_TOKEN_TTL = timedelta(minutes=10)
     REFRESH_TOKEN_TTL = timedelta(days=30)
+    BASE_URL: AnyUrl = os.environ.get('APP_URL')

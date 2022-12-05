@@ -32,7 +32,7 @@ def unauthorized(error):
 
 
 def body_validation(rrequest):
-    if not rrequest.json or 'email' not in rrequest.json or 'password' not in rrequest.json:
+    if 'email' not in rrequest.json or 'password' not in rrequest.json:
         abort(400)
 
 
