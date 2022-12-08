@@ -1,0 +1,11 @@
+from flask import Blueprint
+
+from oauth import oauth_service
+
+authorize_bp = Blueprint('authorize', __name__, url_prefix='/authorize')
+
+
+@authorize_bp.route('/vk', methods=['GET'])
+def authorize_vk():
+    vk_instance = oauth_service.VKOAuth()
+    return vk_instance.authorize()

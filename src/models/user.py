@@ -48,8 +48,9 @@ class LoginRecord(DefaultMixin, Base):
 
 class User(DefaultMixin, Base):
     __tablename__ = 'user_info'
+    __table_args__ = (UniqueConstraint('email', 'username', name='user_email_username_unique_constr'),)
     email = Column(String(256), unique=True, nullable=False)
-    username = Column(String(256), unique=True, nullable=True)
+    username = Column(String(256), nullable=True)
     first_name = Column(String(256), nullable=True)
     last_name = Column(String(256), nullable=True)
     password = Column(String(512), nullable=False)
