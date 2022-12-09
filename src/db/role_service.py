@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from db.pg_base import PostgresService
-from models.user import User, Role, UserRole
+from models.user_model import User, Role, UserRole
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from flask import abort

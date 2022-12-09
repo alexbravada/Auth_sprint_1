@@ -7,6 +7,7 @@ import json
 from flask import redirect
 
 from config.settings import Settings
+from db.user_service import UserService
 
 SETTINGS = Settings()
 
@@ -47,5 +48,6 @@ class VKOAuth(OAuthAbstract):
                                 params={'client_id': self.app_id,
                                         'client_secret': self.secret,
                                         'redirect_uri': self.redirect_uri,
-                                        'code': auth_code})
-        return response.json()
+                                        'code': auth_code}).json()
+        return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
+                                             social_name='VK')
