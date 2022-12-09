@@ -9,7 +9,7 @@ from flask import abort
 from flask_jwt_extended import jwt_required
 
 from db.role_service import RoleService
-from .service import admin_required, token_validation
+from .auth_service import admin_required, token_validation
 
 role_bp = Blueprint('role', __name__, url_prefix='/role')
 

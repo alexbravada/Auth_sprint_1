@@ -10,7 +10,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from db.user_service import UserService
 from db.redis_base import AbstractCacheStorage
 from db.token_store_service import get_token_store_service
-from .service import create_login_tokens, logout_service, \
+from .auth_service import create_login_tokens, logout_service, \
     logout_all_service, token_validation, blacklisting_tokens
 
 user_bp = Blueprint('user', __name__, url_prefix='/user')
