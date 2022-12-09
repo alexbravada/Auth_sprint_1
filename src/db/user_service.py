@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 from sqlalchemy.orm import Session
@@ -7,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import abort
 
 from db.pg_base import PostgresService
-from models.user import User, LoginRecord
+from models.user_model import User, LoginRecord, SocialAccount
 from models.pydantic_classes import UserOutput
 
 
@@ -125,6 +126,51 @@ class UserService(PostgresService):
                 return output
             except NoResultFound:
                 abort(404)
+
+    def oauth_authorize(self, email: str, social_id: str, social_name: str) -> dict:
+        from api.v1.auth.auth_service import create_login_tokens
+        def _login_wo_pass() -> dict:
+            user = session.query(User).filter(User.email == email).one()
+            data = user.as_dict
+            data = UserOutput(**data)
+            access_token, refresh_token = create_login_tokens(email=email, payload=dict(data))
+            return {'access_token': access_token, 'refresh_token': refresh_token}
+
+        def _social_reg(user_id: int):
+            social_reg = SocialAccount(social_id=social_id, social_name=social_name, user_id=user_id)
+            session.add(social_reg)
+            session.commit()
+
+        def _login_rec_wo_ua(user_id: int):
+            loginrec = LoginRecord(login_time=datetime.utcnow(),
+                                   useragent=f'<OAuth through {social_name}>',
+                                   user_id=user_id)
+            session.add(loginrec)
+            session.commit()
+
+        with Session(self.engine) as session:
+            try:
+                user = session.query(User).filter(User.email == email).one()
+                if user:
+                    try:
+                        session.query(SocialAccount).filter(SocialAccount.social_id == social_id,
+                                                            SocialAccount.social_name == social_name,
+                                                            SocialAccount.user_id == user.id).one()
+                        _login_rec_wo_ua(user_id=user.id)
+                        return _login_wo_pass()
+                    except NoResultFound:
+                        _social_reg(user_id=user.id)
+                        _login_rec_wo_ua(user_id=user.id)
+                        return _login_wo_pass()
+
+            except NoResultFound:
+                user = self.register(email=email, password=generate_password_hash(str(random.randint(1, 128))))
+                session.add(user)
+                session.commit()
+                user = session.query(User).filter(User.email == email).one()
+                _social_reg(user_id=user.id)
+                _login_rec_wo_ua(user_id=user.id)
+                return _login_wo_pass()
 
     @staticmethod
     def _row_to_dict(row) -> dict:
