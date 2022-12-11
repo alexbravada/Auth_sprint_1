@@ -12,3 +12,6 @@ mimesis==6.1.1
 pytest
 requests
 flask-migrate==4.0.0
+pyyaml==6.0
+ua-parser==0.16.1
+user-agents==2.2.0

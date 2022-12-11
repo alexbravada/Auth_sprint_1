@@ -6,6 +6,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.exc import MultipleResultsFound
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import abort
+from user_agents import parse as ua_parse
 
 from db.pg_base import PostgresService
 from models.user_model import User, LoginRecord, SocialAccount
@@ -56,7 +57,8 @@ class UserService(PostgresService):
                     output = dict(output)
                     loginrec = LoginRecord(login_time=datetime.utcnow(),
                                            useragent=useragent,
-                                           user_id=user.id)
+                                           user_id=user.id,
+                                           device_type=self._device_type(useragent))
                     session.add(loginrec)
                     session.commit()
                     return output
@@ -127,7 +129,7 @@ class UserService(PostgresService):
             except NoResultFound:
                 abort(404)
 
-    def oauth_authorize(self, email: str, social_id: str, social_name: str) -> dict:
+    def oauth_authorize(self, email: str, social_id: str, social_name: str, useragent: str) -> dict:
         from api.v1.auth.auth_service import create_login_tokens
         def _login_wo_pass() -> dict:
             user = session.query(User).filter(User.email == email).one()
@@ -141,10 +143,11 @@ class UserService(PostgresService):
             session.add(social_reg)
             session.commit()
 
-        def _login_rec_wo_ua(user_id: int):
+        def _login_rec(user_id: int):
             loginrec = LoginRecord(login_time=datetime.utcnow(),
-                                   useragent=f'<OAuth through {social_name}>',
-                                   user_id=user_id)
+                                   useragent=useragent,
+                                   user_id=user_id,
+                                   device_type=self._device_type(useragent))
             session.add(loginrec)
             session.commit()
 
@@ -156,11 +159,11 @@ class UserService(PostgresService):
                         session.query(SocialAccount).filter(SocialAccount.social_id == social_id,
                                                             SocialAccount.social_name == social_name,
                                                             SocialAccount.user_id == user.id).one()
-                        _login_rec_wo_ua(user_id=user.id)
+                        _login_rec(user_id=user.id)
                         return _login_wo_pass()
                     except NoResultFound:
                         _social_reg(user_id=user.id)
-                        _login_rec_wo_ua(user_id=user.id)
+                        _login_rec(user_id=user.id)
                         return _login_wo_pass()
 
             except NoResultFound:
@@ -169,8 +172,25 @@ class UserService(PostgresService):
                 session.commit()
                 user = session.query(User).filter(User.email == email).one()
                 _social_reg(user_id=user.id)
-                _login_rec_wo_ua(user_id=user.id)
+                _login_rec(user_id=user.id)
                 return _login_wo_pass()
+
+    @staticmethod
+    def _device_type(useragent: str) -> str | None:
+        try:
+            ua_instance = ua_parse(useragent)
+            if ua_instance.is_pc:
+                return 'pc'
+            elif ua_instance.is_mobile:
+                return 'mobile'
+            elif ua_instance.is_tablet:
+                return 'tablet'
+            elif ua_instance.is_bot:
+                return 'bot'
+            else:
+                return 'undefined'
+        except Exception:
+            return None
 
     @staticmethod
     def _row_to_dict(row) -> dict:
