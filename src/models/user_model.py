@@ -39,6 +39,7 @@ class LoginRecord(DefaultMixin, Base):
     __tablename__ = 'login_history'
     login_time = Column(DateTime(), nullable=False)
     useragent = Column(String(256), nullable=True)
+    device_type = Column(String(64), nullable=True)
 
     user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
 

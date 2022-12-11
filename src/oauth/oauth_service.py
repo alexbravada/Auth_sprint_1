@@ -43,11 +43,11 @@ class VKOAuth(OAuthAbstract):
             f'&display=page&scope=4194306&response_type=code&v=5.131',
             code=302)
 
-    def callback(self, auth_code) -> dict:
+    def callback(self, auth_code, useragent) -> dict:
         response = requests.get(url='https://oauth.vk.com/access_token',
                                 params={'client_id': self.app_id,
                                         'client_secret': self.secret,
                                         'redirect_uri': self.redirect_uri,
                                         'code': auth_code}).json()
         return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
-                                             social_name='VK')
+                                             social_name='VK', useragent=useragent)

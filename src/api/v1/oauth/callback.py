@@ -13,4 +13,4 @@ callback_bp = Blueprint('callback', __name__, url_prefix='/callback')
 def callback_vk():
     vk_code = request.args.get('code')
     vk_instance = oauth_service.VKOAuth()
-    return jsonify(vk_instance.callback(vk_code)), HTTPStatus.OK
+    return jsonify(vk_instance.callback(vk_code, useragent=request.headers.get('User-Agent'))), HTTPStatus.OK
