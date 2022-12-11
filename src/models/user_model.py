@@ -21,6 +21,38 @@ Base = declarative_base()
 metadata_obj = MetaData()
 
 
+def create_partition_by_social_provider(target, connection, **kw) -> None:
+    """ creating partition by user_sign_in """
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "social_account_vk" PARTITION OF "social_account" FOR VALUES IN ('VK')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "social_account_yandex" PARTITION OF "social_account" FOR VALUES IN ('YANDEX')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "social_account_google" PARTITION OF "social_account" FOR VALUES IN ('GOOGLE')"""
+    )
+
+
+def create_partition_by_device(target, connection, **kw) -> None:
+    """ creating partition by user_sign_in """
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "login_history_smart" PARTITION OF "login_history" FOR VALUES IN ('smart')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "login_history_mobile" PARTITION OF "login_history" FOR VALUES IN ('mobile')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "login_history_tablet" PARTITION OF "login_history" FOR VALUES IN ('tablet')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "login_history_pc" PARTITION OF "login_history" FOR VALUES IN ('pc')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "login_history_bot" PARTITION OF "login_history" FOR VALUES IN ('bot')"""
+    )
+
+
 class DefaultMixin:
     @declared_attr
     def __tablename__(cls):
@@ -37,14 +69,22 @@ class DefaultMixin:
 
 class LoginRecord(DefaultMixin, Base):
     __tablename__ = 'login_history'
+    __table_args__ = (
+        UniqueConstraint('id', 'device_type'),
+        {
+            'postgresql_partition_by': 'LIST (device_type)',
+            'listeners': [('after_create', create_partition_by_device)],
+        }
+    )
     login_time = Column(DateTime(), nullable=False)
     useragent = Column(String(256), nullable=True)
-    device_type = Column(String(64), nullable=True)
+    device_type = Column(String(64), nullable=True, primary_key=True)
 
     user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
 
     def __repr__(self):
-        return f'LoginRecord(id={self.id!r}, login_time={self.login_time!r}, useragent={self.useragent!r})'
+        return f'LoginRecord(id={self.id!r}, login_time={self.login_time!r}, ' \
+               f'useragent={self.useragent!r}, device_type={self.device_type!r})'
 
 
 class User(DefaultMixin, Base):
@@ -58,6 +98,7 @@ class User(DefaultMixin, Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     is_admin = Column(Boolean, default=False)
+    is_adult = Column(Boolean, default=False)
 
     login_records = relationship('LoginRecord')
     roles = relationship('UserRole', backref='user')
@@ -75,13 +116,19 @@ class User(DefaultMixin, Base):
 
 class SocialAccount(DefaultMixin, Base):
     __tablename__ = 'social_account'
-    __table_args__ = (UniqueConstraint('social_id', 'social_name', name='social_pk'),)
+    __table_args__ = (UniqueConstraint('social_id', 'social_name', name='social_pk'),
+                      UniqueConstraint('id', 'social_name'),
+                      {
+                          'postgresql_partition_by': 'LIST (social_name)',
+                          'listeners': [('after_create', create_partition_by_social_provider)],
+                      }
+                      )
 
     user_id = Column(Integer(), ForeignKey('user_info.id'), nullable=False)
     users = relationship('User', backref=backref('social_accounts', lazy=True))
 
     social_id = Column(Text, nullable=False)
-    social_name = Column(Text, nullable=False)
+    social_name = Column(Text, nullable=False, primary_key=True)
 
     def __repr__(self):
         return f'<SocialAccount {self.social_name}:{self.user_id}>'
