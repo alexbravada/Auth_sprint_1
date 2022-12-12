@@ -45,3 +45,11 @@ services:
       - auth_service
     ports:
       - "80:80"
+  jaeger:
+    container_name: auth-jaeger
+    image: jaegertracing/all-in-one:latest
+    depends_on:
+      - auth_service
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
