@@ -11,6 +11,7 @@ from user_agents import parse as ua_parse
 from db.pg_base import PostgresService
 from models.user_model import User, LoginRecord, SocialAccount
 from models.pydantic_classes import UserOutput
+from utils.jaeger_wraps import trace
 
 
 class UserService(PostgresService):
@@ -129,8 +130,11 @@ class UserService(PostgresService):
             except NoResultFound:
                 abort(404)
 
+    @trace('UserService.oauth_authorize')
     def oauth_authorize(self, email: str, social_id: str, social_name: str, useragent: str) -> dict:
         from api.v1.auth.auth_service import create_login_tokens
+
+        @trace('login without password')
         def _login_wo_pass() -> dict:
             user = session.query(User).filter(User.email == email).one()
             data = user.as_dict
@@ -138,11 +142,13 @@ class UserService(PostgresService):
             access_token, refresh_token = create_login_tokens(email=email, payload=dict(data))
             return {'access_token': access_token, 'refresh_token': refresh_token}
 
+        @trace('SocialAccount instance created and commited')
         def _social_reg(user_id: int):
             social_reg = SocialAccount(social_id=social_id, social_name=social_name, user_id=user_id)
             session.add(social_reg)
             session.commit()
 
+        @trace('LoginRecord instance created and commited')
         def _login_rec(user_id: int):
             loginrec = LoginRecord(login_time=datetime.utcnow(),
                                    useragent=useragent,

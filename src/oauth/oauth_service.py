@@ -8,6 +8,7 @@ from flask import redirect
 
 from config.settings import Settings
 from db.user_service import UserService
+from utils.jaeger_wraps import trace
 
 SETTINGS = Settings()
 
@@ -43,13 +44,18 @@ class VKOAuth(OAuthAbstract):
             f'&display=page&scope=4194306&response_type=code&v=5.131',
             code=302)
 
+    @trace('VKOAuth.callback')
     def callback(self, auth_code, useragent) -> dict:
-        response = requests.get(url='https://oauth.vk.com/access_token',
+        @trace('VKOAuth.callback.token_swap')
+        def token_swap() -> dict:
+            return requests.get(url='https://oauth.vk.com/access_token',
                                 params={'client_id': self.app_id,
                                         'client_secret': self.secret,
                                         'redirect_uri': self.redirect_uri,
                                         'code': auth_code}).json()
-        return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
+
+        data = token_swap()
+        return UserService().oauth_authorize(email=data['email'], social_id=str(data['user_id']),
                                              social_name='VK', useragent=useragent)
 
 
@@ -73,10 +79,11 @@ class YandexOAuth(OAuthAbstract):
             code=302)
 
     def callback(self, auth_code, useragent) -> dict:
-        response = requests.get(url='https://yandex.ru/dev/id/doc/dg/oauth/reference/auto-code-client.html#auto-code-client__get-token',
-                                params={'client_id': self.app_id,
-                                        'client_secret': self.secret,
-                                        'redirect_uri': self.redirect_uri,
-                                        'code': auth_code}).json()
+        response = requests.get(
+            url='https://yandex.ru/dev/id/doc/dg/oauth/reference/auto-code-client.html#auto-code-client__get-token',
+            params={'client_id': self.app_id,
+                    'client_secret': self.secret,
+                    'redirect_uri': self.redirect_uri,
+                    'code': auth_code}).json()
         return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
                                              social_name='YANDEX', useragent=useragent)
