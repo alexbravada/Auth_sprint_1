@@ -27,11 +27,16 @@ class OAuthCredVK(BaseModel):
     secret: str = os.environ.get('VK_OAUTH_SECRET')
     service_key: str = os.environ.get('VK_OAUTH_SERVICE_KEY')
 
+class OAuthCredYandex(BaseModel):
+    id: str = os.environ.get('Yandex_OAUTH_ClientID')
+    secret: str = os.environ.get('Yandex_OAUTH_ClientSecret')
+
 
 class Settings(BaseSettings):
     PG: PGDSN = PGDSN()
     Redis: RedisDSN = RedisDSN()
     VK: OAuthCredVK = OAuthCredVK()
+    Yandex: OAuthCredYandex = OAuthCredYandex()
     PG_CONNECT_STRING: AnyUrl = f'postgresql+psycopg2://{PG.user}:{PG.password}@{PG.host}:{PG.port}/{PG.dbname}'
     ACCESS_TOKEN_TTL = timedelta(minutes=10)
     REFRESH_TOKEN_TTL = timedelta(days=30)
