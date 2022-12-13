@@ -5,7 +5,6 @@ from flask import request
 from flask import jsonify
 
 from oauth import oauth_service
-from utils.jaeger_wraps import trace
 
 callback_bp = Blueprint('callback', __name__, url_prefix='/callback')
 

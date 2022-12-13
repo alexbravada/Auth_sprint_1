@@ -8,8 +8,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 import click
 
+from config.settings import Settings
 from db.user_service import UserService
 from api import api_blueprint
+
+SETTINGS = Settings()
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'changeme'
@@ -41,12 +44,13 @@ def before_request():
 
 
 def configure_tracer() -> None:
+    jaegersettings = SETTINGS.Jaeger.dict()
     trace.set_tracer_provider(TracerProvider())
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
-                agent_host_name='auth-jaeger',
-                agent_port=6831,
+                agent_host_name=jaegersettings.get('host'),
+                agent_port=jaegersettings.get('port'),
             )
         )
     )

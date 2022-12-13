@@ -22,6 +22,11 @@ class RedisDSN(BaseModel):
     password: str = os.environ.get('REDIS_PASSWORD')
 
 
+class Jaeger(BaseModel):
+    host: str = os.environ.get('JAEGER_HOSTNAME')
+    port: int = int(os.environ.get('JAEGER_PORT'))
+
+
 class OAuthCredVK(BaseModel):
     id: str = os.environ.get('VK_OAUTH_ID')
     secret: str = os.environ.get('VK_OAUTH_SECRET')
@@ -35,6 +40,7 @@ class OAuthCredYandex(BaseModel):
 class Settings(BaseSettings):
     PG: PGDSN = PGDSN()
     Redis: RedisDSN = RedisDSN()
+    Jaeger: Jaeger = Jaeger()
     VK: OAuthCredVK = OAuthCredVK()
     Yandex: OAuthCredYandex = OAuthCredYandex()
     PG_CONNECT_STRING: AnyUrl = f'postgresql+psycopg2://{PG.user}:{PG.password}@{PG.host}:{PG.port}/{PG.dbname}'
