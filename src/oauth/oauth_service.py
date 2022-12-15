@@ -10,8 +10,6 @@ from config.settings import Settings
 from db.user_service import UserService
 from utils.jaeger_wraps import trace
 
-#import google.oauth2.credentials
-#import google_auth_oauthlib.flow
 SETTINGS = Settings()
 
 
@@ -102,24 +100,25 @@ class GoogleOAuth(OAuthAbstract):
         self.authorize_url = f'https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&access_type=offline&response_type=code&redirect_uri={self.redirect_uri}&scope={self.scope}'
 
     def authorize(self):
-        #return redirect()
-        # https://accounts.google.com/o/oauth2/v2/auth
-        #.../auth/userinfo.profile
-        # .../auth/userinfo.email
-        # /openid
-        #Authorization: Bearer
         return redirect(self.authorize_url, code=302)
 
+    @trace('GoogleOAuth.callback')
     def callback(self, auth_code, useragent):
-        params = {'code': auth_code,
-                  'client_id': self.client_id,
-                  'client_secret': self.client_secret,
-                  'redirect_uri': self.redirect_uri,
-                  'grant_type': 'authorization_code'
-                  }
-        response = requests.post('https://oauth2.googleapis.com/token', data=params).json()
-        #pprint(response)
-        print('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSD/n\n\n\n\n\n\n\n\n\nddddddddddddddddddddddddddd')
-        #response = requests.get('https://oauth2.googleapis.com/token', headers=f'Authorize Bearer {auth_code}')
-        return UserService().oauth_authorize(email=response.get('email'), social_id=str(response.get('user_id')),
-                                             social_name='Google', useragent=useragent)
+        @trace('GoogleOAuth.callback.token_swap')
+        def token_swap() -> dict:
+            return requests.post('https://oauth2.googleapis.com/token',
+                                 data={'code': auth_code,
+                                       'client_id': self.client_id,
+                                       'client_secret': self.client_secret,
+                                       'redirect_uri': self.redirect_uri,
+                                       'grant_type': 'authorization_code'
+                                       }).json()
+
+        @trace('GoogleOAuth.callback.request_data')
+        def request_data(data: dict) -> dict:
+            return requests.get(url='https://www.googleapis.com/userinfo/v2/me',
+                                headers={'Authorization': f"""{data['token_type']} {data['access_token']}"""}).json()
+
+        response = request_data(token_swap())
+        return UserService().oauth_authorize(email=response.get('email'), social_id=str(response.get('id')),
+                                             social_name='GOOGLE', useragent=useragent)
