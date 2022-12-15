@@ -87,3 +87,38 @@ class YandexOAuth(OAuthAbstract):
                     'code': auth_code}).json()
         return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
                                              social_name='YANDEX', useragent=useragent)
+
+
+class GoogleOAuth(OAuthAbstract):
+    def __init__(self):
+        super().__init__()
+        self.settings = SETTINGS.Google.dict()
+        self.client_id = self.settings.get('client_id')
+        self.client_secret = self.settings.get('client_secret')
+        self.redirect_uri = f'{SETTINGS.BASE_URL}/api/v1/oauth/callback/google'
+        self.scope = 'email profile openid'
+        self.authorize_url = f'https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&access_type=offline&response_type=code&redirect_uri={self.redirect_uri}&scope={self.scope}'
+
+    def authorize(self):
+        return redirect(self.authorize_url, code=302)
+
+    @trace('GoogleOAuth.callback')
+    def callback(self, auth_code, useragent):
+        @trace('GoogleOAuth.callback.token_swap')
+        def token_swap() -> dict:
+            return requests.post('https://oauth2.googleapis.com/token',
+                                 data={'code': auth_code,
+                                       'client_id': self.client_id,
+                                       'client_secret': self.client_secret,
+                                       'redirect_uri': self.redirect_uri,
+                                       'grant_type': 'authorization_code'
+                                       }).json()
+
+        @trace('GoogleOAuth.callback.request_data')
+        def request_data(data: dict) -> dict:
+            return requests.get(url='https://www.googleapis.com/userinfo/v2/me',
+                                headers={'Authorization': f"""{data['token_type']} {data['access_token']}"""}).json()
+
+        response = request_data(token_swap())
+        return UserService().oauth_authorize(email=response.get('email'), social_id=str(response.get('id')),
+                                             social_name='GOOGLE', useragent=useragent)

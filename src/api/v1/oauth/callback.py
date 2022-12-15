@@ -15,8 +15,16 @@ def callback_vk():
     vk_instance = oauth_service.VKOAuth()
     return jsonify(vk_instance.callback(vk_code, useragent=request.headers.get('User-Agent'))), HTTPStatus.OK
 
+
 @callback_bp.route('/yandex', methods=['GET'])
 def callback_yandex():
     yandex_code = request.args.get('code')
     yandex_instance = oauth_service.YandexOAuth()
     return jsonify(yandex_instance.callback(yandex_code, useragent=request.headers.get('User-Agent'))), HTTPStatus.OK
+
+
+@callback_bp.route('/google', methods=['GET'])
+def callback_google():
+    google_code = request.args.get('code')
+    google_instance = oauth_service.GoogleOAuth()
+    return jsonify(google_instance.callback(google_code, useragent=request.headers.get('User-Agent'))), HTTPStatus.OK

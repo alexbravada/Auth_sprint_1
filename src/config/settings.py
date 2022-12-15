@@ -37,12 +37,17 @@ class OAuthCredYandex(BaseModel):
     secret: str = os.environ.get('Yandex_OAUTH_ClientSecret')
 
 
+class OAuthGoogle(BaseModel):
+    client_id = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+    client_secret = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
+
 class Settings(BaseSettings):
     PG: PGDSN = PGDSN()
     Redis: RedisDSN = RedisDSN()
     Jaeger: Jaeger = Jaeger()
     VK: OAuthCredVK = OAuthCredVK()
     Yandex: OAuthCredYandex = OAuthCredYandex()
+    Google: OAuthGoogle = OAuthGoogle()
     PG_CONNECT_STRING: AnyUrl = f'postgresql+psycopg2://{PG.user}:{PG.password}@{PG.host}:{PG.port}/{PG.dbname}'
     ACCESS_TOKEN_TTL = timedelta(minutes=10)
     REFRESH_TOKEN_TTL = timedelta(days=30)
