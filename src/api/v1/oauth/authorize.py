@@ -18,5 +18,5 @@ def authorize_yandex():
 
 @authorize_bp.route('/google', methods=['GET'])
 def authorize_google():
-    google_instance = oauth_sevice.GoogleOAuth()
+    google_instance = oauth_service.GoogleOAuth()
     return google_instance.authorize()

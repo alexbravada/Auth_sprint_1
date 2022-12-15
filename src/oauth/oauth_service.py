@@ -98,7 +98,8 @@ class GoogleOAuth(OAuthAbstract):
         self.client_id = self.settings.get('client_id')
         self.client_secret = self.settings.get('client_secret')
         self.redirect_uri = f'{SETTINGS.BASE_URL}/api/v1/oauth/callback/google'
-        self.authorize_url = 'https://accounts.google.com/o/oauth2/v2/auth?client_id={self.client_id}&access_type=offline&response_type=code&redirect_uri={self.redirect_uri}'
+        self.scope = 'email profile openid'
+        self.authorize_url = f'https://accounts.google.com/o/oauth2/v2/auth?client_id={self.client_id}&access_type=offline&response_type=code&redirect_uri={self.redirect_uri}&scope={self.scope}'
 
     def authorize(self):
         #return redirect()
@@ -106,7 +107,7 @@ class GoogleOAuth(OAuthAbstract):
         #.../auth/userinfo.profile
         # .../auth/userinfo.email
         # /openid
-        
+        #Authorization: Bearer
         return redirect(self.authorize_url, code=302)
 
     def callback(self, auth_code, useragent):
@@ -117,5 +118,6 @@ class GoogleOAuth(OAuthAbstract):
                   'grant_type': 'authorization_code'
                   }
         response = requests.post('https://oauth2.googleapis.com/token', data=params)
+        #response = requests.get('https://oauth2.googleapis.com/token', headers=f'Authorize Bearer {auth_code}')
         return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
                                              social_name='Google', useragent=useragent)
