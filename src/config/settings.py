@@ -33,8 +33,8 @@ class OAuthCredVK(BaseModel):
     service_key: str = os.environ.get('VK_OAUTH_SERVICE_KEY')
 
 class OAuthCredYandex(BaseModel):
-    id: str = os.environ.get('Yandex_OAUTH_ClientID')
-    secret: str = os.environ.get('Yandex_OAUTH_ClientSecret')
+    id: str = os.environ.get('YANDEX_OAUTH_CLIENT_ID')
+    secret: str = os.environ.get('YANDEX_OAUTH_CLIENT_SECRET')
 
 
 class OAuthGoogle(BaseModel):

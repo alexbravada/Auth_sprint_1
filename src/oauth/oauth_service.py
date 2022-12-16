@@ -79,8 +79,8 @@ class YandexOAuth(OAuthAbstract):
             f'&display=popup&response_type=code',
             code=302)
 
-    # def callback(self, auth_code, useragent) -> dict:
-    def callback(self, auth_code) -> dict:
+    @trace('YandexOAuth.callback')
+    def callback(self, auth_code, useragent) -> dict:
         response = requests.post(
             'https://oauth.yandex.ru/token',
             urlencode({'grant_type': 'authorization_code',
@@ -96,8 +96,7 @@ class YandexOAuth(OAuthAbstract):
                        'oauth_token': access_token})).json()
 
         return UserService().oauth_authorize(email=response['emails'][0], social_id=str(response['id']),
-                                             social_name='YANDEX', useragent=response['client_id'])
-
+                                             social_name='YANDEX', useragent=useragent)
 
 class GoogleOAuth(OAuthAbstract):
     def __init__(self):

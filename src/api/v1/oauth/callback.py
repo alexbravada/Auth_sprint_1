@@ -22,7 +22,7 @@ def callback_yandex():
     yandex_code = request.args.get('code')
 
     yandex_instance = oauth_service.YandexOAuth()
-    data = jsonify(yandex_instance.callback(yandex_code))
+    data = jsonify(yandex_instance.callback(yandex_code, useragent=request.headers.get('User-Agent'))),  HTTPStatus.OK
 
     return data
 
