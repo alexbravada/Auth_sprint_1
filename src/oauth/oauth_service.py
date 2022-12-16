@@ -3,12 +3,13 @@ from abc import ABC
 from typing import Optional
 import requests
 import json
-
+import base64
 from flask import redirect
 
 from config.settings import Settings
 from db.user_service import UserService
 from utils.jaeger_wraps import trace
+from urllib.parse import urlencode
 
 SETTINGS = Settings()
 
@@ -74,19 +75,28 @@ class YandexOAuth(OAuthAbstract):
         response_type=code - required
         '''
         return redirect(
-            f'https://oauth.yandex.ru/authorize?client_id={self.app_id}&redirect_uri={self.redirect_uri}'
-            f'&display=popup&scope=4194306&response_type=code',
+            f'https://oauth.yandex.ru/authorize?client_id={self.app_id}'  # &redirect_uri={self.redirect_uri}'
+            f'&display=popup&response_type=code',
             code=302)
 
-    def callback(self, auth_code, useragent) -> dict:
+    # def callback(self, auth_code, useragent) -> dict:
+    def callback(self, auth_code) -> dict:
+        response = requests.post(
+            'https://oauth.yandex.ru/token',
+            urlencode({'grant_type': 'authorization_code',
+                       'client_id': self.app_id,
+                       'client_secret': self.secret,
+                       'code': auth_code})).json()
+
+        access_token = response['access_token']
+
         response = requests.get(
-            url='https://yandex.ru/dev/id/doc/dg/oauth/reference/auto-code-client.html#auto-code-client__get-token',
-            params={'client_id': self.app_id,
-                    'client_secret': self.secret,
-                    'redirect_uri': self.redirect_uri,
-                    'code': auth_code}).json()
-        return UserService().oauth_authorize(email=response['email'], social_id=str(response['user_id']),
-                                             social_name='YANDEX', useragent=useragent)
+            'https://login.yandex.ru/info?',
+            urlencode({'Authorization': 'OAuth',
+                       'oauth_token': access_token})).json()
+
+        return UserService().oauth_authorize(email=response['emails'][0], social_id=str(response['id']),
+                                             social_name='YANDEX', useragent=response['client_id'])
 
 
 class GoogleOAuth(OAuthAbstract):

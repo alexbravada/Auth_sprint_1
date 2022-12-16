@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 
 from flask import Blueprint
@@ -19,8 +20,11 @@ def callback_vk():
 @callback_bp.route('/yandex', methods=['GET'])
 def callback_yandex():
     yandex_code = request.args.get('code')
+
     yandex_instance = oauth_service.YandexOAuth()
-    return jsonify(yandex_instance.callback(yandex_code, useragent=request.headers.get('User-Agent'))), HTTPStatus.OK
+    data = jsonify(yandex_instance.callback(yandex_code))
+
+    return data
 
 
 @callback_bp.route('/google', methods=['GET'])
