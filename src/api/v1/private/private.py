@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from flask import Blueprint, make_response, request, jsonify, abort
+from sqlalchemy.exc import OperationalError
 
 from db.resource_service import ResourceService
 
@@ -56,11 +57,27 @@ def check_permission():
     if validation_at_least_one(request, 'get', ('resource_uuid',)) and \
             validation_at_least_one(request, 'get', ('resource_type',)):
         role_id = request.args.get('role_id')
-        return jsonify(ResourceService().check_permissions_role_resource(
-            role_id=role_id if role_id else 1,
-            resource_uuid=request.args.get('resource_uuid'),
-            resource_type=request.args.get('resource_type')
-        )), HTTPStatus.OK
+        try:
+            return jsonify(ResourceService().check_permissions_role_resource(
+                role_id=role_id if role_id else 1,
+                resource_uuid=request.args.get('resource_uuid'),
+                resource_type=request.args.get('resource_type')
+            )), HTTPStatus.OK
+        except OperationalError:
+            return jsonify({
+                'resource': {
+                    'resource_uuid': request.args.get('resource_uuid'),
+                    'resource_type': request.args.get('resource_type')
+                    },
+                'permissions': {
+                    'role_id': 1,
+                    'can_create': False,
+                    'can_read': False,
+                    'can_update': False,
+                    'can_delete': False
+                }
+
+            }), HTTPStatus.SERVICE_UNAVAILABLE
     else:
         abort(400)
 
