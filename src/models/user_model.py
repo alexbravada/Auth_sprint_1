@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint
+from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy import Integer, String, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, backref, relationship
 from sqlalchemy.ext.declarative import declared_attr
@@ -158,7 +158,7 @@ class Role(DefaultMixin, Base):
 class ResourceRole(DefaultMixin, Base):
     __tablename__ = 'resource__role'
     role_id = Column(Integer(), ForeignKey('role.id'))
-    # resource_id = Column(Integer(), ForeignKey('resource.id'))
+    resource_id = Column(Integer(), ForeignKey('resource.id'))
     can_create = Column(Boolean, nullable=False)
     can_read = Column(Boolean, nullable=False)
     can_update = Column(Boolean, nullable=False)
@@ -168,6 +168,16 @@ class ResourceRole(DefaultMixin, Base):
         return f'ResourceRole(id={self.id!r}, role_id={self.role_id!r}, resource_id={self.resource_id!r}, ' \
                f'can_create={self.can_create!r}, can_read={self.can_read!r}, can_update={self.can_update!r}, ' \
                f'can_delete={self.can_delete!r})'
+
+
+class Resource(DefaultMixin, Base):
+    __tablename__ = 'resource'
+    __table_args__ = (UniqueConstraint('resource_uuid', 'resource_type', name='uuid__type_pk'),)
+    resource_uuid = Column(String(256), nullable=False)
+    resource_type = Column(String(256), nullable=False)
+    name = Column(String(250), nullable=True)
+
+    roles = relationship('ResourceRole', backref='resource')
 
 
 Base.metadata.create_all(bind=engine)
