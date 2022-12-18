@@ -377,15 +377,19 @@ components:
         can_create:
           type: boolean
           example: true
+          default: false
         can_read:
           type: boolean
           example: true
+          default: false
         can_update:
           type: boolean
           example: false
+          default: false
         can_delete:
           type: boolean
           example: false
+          default: false
 
     Resource:
       type: object
@@ -503,4 +507,3 @@ components:
           $ref: '#/components/schemas/Resource'
         permissions:
           $ref: '#/components/schemas/Permissions'
-
