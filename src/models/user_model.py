@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint
+from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy import Integer, String, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, backref, relationship
 from sqlalchemy.ext.declarative import declared_attr
@@ -80,7 +80,7 @@ class LoginRecord(DefaultMixin, Base):
     useragent = Column(String(256), nullable=True)
     device_type = Column(String(64), nullable=True, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('user_info.id', ondelete='CASCADE'), nullable=False)
 
     def __repr__(self):
         return f'LoginRecord(id={self.id!r}, login_time={self.login_time!r}, ' \
@@ -100,8 +100,13 @@ class User(DefaultMixin, Base):
     is_admin = Column(Boolean, default=False)
     is_adult = Column(Boolean, default=False)
 
-    login_records = relationship('LoginRecord')
-    roles = relationship('UserRole', backref='user')
+    role_id = Column(Integer, ForeignKey('role.id'), nullable=False)
+
+    login_records = relationship('LoginRecord', cascade='all, delete-orphan', passive_deletes=True)
+
+    social_accounts = relationship('SocialAccount', backref='user',
+                                   cascade='all, delete-orphan',
+                                   passive_deletes=True)
 
     def __repr__(self):
         return f'User(id={self.id!r}, email={self.email!r})'
@@ -124,8 +129,7 @@ class SocialAccount(DefaultMixin, Base):
                       }
                       )
 
-    user_id = Column(Integer(), ForeignKey('user_info.id'), nullable=False)
-    users = relationship('User', backref=backref('social_accounts', lazy=True))
+    user_id = Column(Integer(), ForeignKey('user_info.id', ondelete='CASCADE'), nullable=False)
 
     social_id = Column(Text, nullable=False)
     social_name = Column(Text, nullable=False, primary_key=True)
@@ -134,22 +138,23 @@ class SocialAccount(DefaultMixin, Base):
         return f'<SocialAccount {self.social_name}:{self.user_id}>'
 
 
-class UserRole(DefaultMixin, Base):
-    __tablename__ = 'user__role'
-    __table_args__ = (UniqueConstraint('user_id', 'role_id', name='user__role_pk'),)
-
-    user_id = Column(Integer(), ForeignKey('user_info.id'))
-    role_id = Column(Integer(), ForeignKey('role.id'))
-
-    def __repr__(self):
-        return f'User_Role(id={self.id!r}, user_id={self.user_id!r}, role_id={self.role_id!r})'
+# class UserRole(DefaultMixin, Base):
+#     __tablename__ = 'user__role'
+#     __table_args__ = (UniqueConstraint('user_id', 'role_id', name='user__role_pk'),)
+#
+#     user_id = Column(Integer(), ForeignKey('user_info.id'))
+#     role_id = Column(Integer(), ForeignKey('role.id'))
+#
+#     def __repr__(self):
+#         return f'User_Role(id={self.id!r}, user_id={self.user_id!r}, role_id={self.role_id!r})'
 
 
 class Role(DefaultMixin, Base):
     __tablename__ = 'role'
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=True)
-    users = relationship('UserRole', backref='role')
+
+    users = relationship('User', backref='role')
 
     def __repr__(self):
         return f'Role(id={self.id!r}, name={self.name!r})'
@@ -158,7 +163,7 @@ class Role(DefaultMixin, Base):
 class ResourceRole(DefaultMixin, Base):
     __tablename__ = 'resource__role'
     role_id = Column(Integer(), ForeignKey('role.id'))
-    # resource_id = Column(Integer(), ForeignKey('resource.id'))
+    resource_id = Column(Integer(), ForeignKey('resource.id', ondelete='CASCADE'))
     can_create = Column(Boolean, nullable=False)
     can_read = Column(Boolean, nullable=False)
     can_update = Column(Boolean, nullable=False)
@@ -168,6 +173,16 @@ class ResourceRole(DefaultMixin, Base):
         return f'ResourceRole(id={self.id!r}, role_id={self.role_id!r}, resource_id={self.resource_id!r}, ' \
                f'can_create={self.can_create!r}, can_read={self.can_read!r}, can_update={self.can_update!r}, ' \
                f'can_delete={self.can_delete!r})'
+
+
+class Resource(DefaultMixin, Base):
+    __tablename__ = 'resource'
+    __table_args__ = (UniqueConstraint('resource_uuid', 'resource_type', name='uuid__type_pk'),)
+    resource_uuid = Column(String(256), nullable=False)
+    resource_type = Column(String(256), nullable=False)
+    name = Column(String(250), nullable=True)
+
+    roles = relationship('ResourceRole', backref='resource', cascade='all, delete-orphan', passive_deletes=True)
 
 
 Base.metadata.create_all(bind=engine)

@@ -1,0 +1,516 @@
+openapi: "3.0.0"
+info:
+  title: Private AuthAPI
+  version: 1.0.0
+servers:
+  - url: 'http://auth_service/api/v1/private'
+paths:
+    /check_permissions:
+        get:
+            summary: Check permission for resource
+            operationId: boolPermission
+            tags: [permissions]
+            parameters:
+              - name: role_id
+                in: query
+                description: 'ID of Role'
+                required: false
+                example: 1
+                schema:
+                  type: integer
+              - name: resource_type
+                in: query
+                description: 'Type of resource'
+                required: true
+                example: 'filmwork'
+                schema:
+                  type: string
+              - name: resource_uuid
+                in: query
+                description: 'External UUID for resource'
+                required: true
+                example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+                schema:
+                  type: string
+            responses:
+              '200':
+                description: >-
+                  Permissions for this resource is found
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/checkPermissions'
+              '404':
+                description: >-
+                  Permissions for this resource not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+    /resources:
+        get:
+            summary: Show resources
+            operationId: showResources
+            tags: [resources]
+            parameters:
+              - name: resource_uuid
+                in: query
+                description: 'External UUID for resource'
+                required: false
+                example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+                schema:
+                  type: string
+                  default:
+              - name: resource_name
+                in: query
+                description: 'Name of Resource'
+                required: false
+                example: 'Star Wars I'
+                schema:
+                  type: string
+                  default:
+              - name: resource_type
+                in: query
+                description: 'Type of Resource'
+                required: false
+                example: 'filmwork'
+                schema:
+                  type: string
+                  default:
+              - name: resource_id
+                in: query
+                description: 'ID of Resource'
+                required: false
+                example: '2'
+                schema:
+                  type: integer
+                  default:
+
+
+
+            responses:
+              '200':
+                description: >-
+                  Resources found
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Resource'
+              '404':
+                description: >-
+                  Resources not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+              '400':
+                description: >-
+                  Invalid query string
+                content:
+                  application/json:
+                    schema:
+                      type: string
+        post:
+            summary: Create resources
+            operationId: createResources
+            tags: [resources]
+            requestBody:
+              description: Resource and permissions to add
+              required: true
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/NewResource'
+            responses:
+              '200':
+                description: >-
+                  Resource created
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/createdResource'
+              '404':
+                description: >-
+                  Resources not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+              '400':
+                description: >-
+                  Invalid query string
+                content:
+                  application/json:
+                    schema:
+                      type: string
+        put:
+          summary: Update Resource
+          operationId: updateResource
+          tags: [resources]
+          requestBody:
+            description: Resource update
+            required: false
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UpdateResource'
+          responses:
+              '200':
+                description: >-
+                  Resource updated
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Resource'
+              '404':
+                description: >-
+                  Resources not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+              '400':
+                description: >-
+                  Invalid query string
+                content:
+                  application/json:
+                    schema:
+                      type: string
+        delete:
+          summary: Delete Resource
+          operationId: deleteResource
+          tags: [resources]
+          parameters:
+              - name: resource_id
+                in: query
+                description: 'ID of Resource'
+                required: false
+                example: '2'
+                schema:
+                  type: integer
+                  default:
+              - name: resource_uuid
+                in: query
+                description: 'External UUID for resource'
+                required: false
+                example: 'abcf0a64-7e31-22ed-a2eb-6242ac120050'
+                schema:
+                  type: string
+              - name: resource_type
+                in: query
+                description: 'Type of Resource'
+                required: false
+                example: 'filmwork'
+                schema:
+                  type: string
+
+          responses:
+              '200':
+                description: >-
+                  Resource updated
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Resource'
+
+              '404':
+                description: >-
+                  Resources not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+              '400':
+                description: >-
+                  Invalid query string
+                content:
+                  application/json:
+                    schema:
+                      type: string
+    /resources/{resource_type}/{resource_uuid}:
+      get:
+        summary: Show resources
+        operationId: showResourcesByUUID
+        tags: [resources]
+        parameters:
+          - name: resource_type
+            in: path
+            description: 'Type of Resource'
+            required: true
+            example: 'filmwork'
+            schema:
+              type: string
+          - name: resource_uuid
+            in: path
+            description: 'External UUID for resource'
+            required: true
+            example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+            schema:
+              type: string
+        responses:
+              '200':
+                description: >-
+                  Resources found
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Resource'
+              '404':
+                description: >-
+                  Resources not found
+                content:
+                  application/json:
+                    schema:
+                      type: string
+              '400':
+                description: >-
+                  Invalid query string
+                content:
+                  application/json:
+                    schema:
+                      type: string
+
+      put:
+        summary: Update resource
+        operationId: updateResourceByPath
+        tags: [resources]
+        parameters:
+          - name: resource_type
+            in: path
+            description: 'Type of Resource'
+            required: true
+            example: 'filmwork'
+            schema:
+              type: string
+          - name: resource_uuid
+            in: path
+            description: 'External UUID for resource'
+            required: true
+            example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+            schema:
+              type: string
+
+        requestBody:
+          description: Resource update dy path uuid prorived
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResourceByPath'
+        responses:
+          '200':
+            description: >-
+              Resources update
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Resource'
+          '404':
+            description: >-
+              Resources not found
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: >-
+              Invalid query string
+            content:
+              application/json:
+                schema:
+                  type: string
+      delete:
+        summary: Delete resource
+        operationId: deleteResourceByPath
+        tags: [resources]
+        parameters:
+          - name: resource_type
+            in: path
+            description: 'Type of Resource'
+            required: true
+            example: 'filmwork'
+            schema:
+              type: string
+          - name: resource_uuid
+            in: path
+            description: 'External UUID for resource'
+            required: true
+            example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+            schema:
+              type: string
+        responses:
+          '200':
+            description: >-
+              Resources delete
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Resource'
+          '404':
+            description: >-
+              Resources not found
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: >-
+              Invalid query string
+            content:
+              application/json:
+                schema:
+                  type: string
+
+components:
+  schemas:
+    checkPermissions:
+      type: object
+      properties:
+        resource:
+          $ref: '#/components/schemas/Resource'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
+    Permissions:
+      type: object
+      properties:
+        role_id:
+          description: 'Role ID for this permissions'
+          type: integer
+          example: 1
+        resource_id:
+          description: 'Resource ID for this permissions'
+          type: integer
+          example: 1
+        can_create:
+          type: boolean
+          example: true
+          default: false
+        can_read:
+          type: boolean
+          example: true
+          default: false
+        can_update:
+          type: boolean
+          example: false
+          default: false
+        can_delete:
+          type: boolean
+          example: false
+          default: false
+
+    Resource:
+      type: object
+      properties:
+        id:
+          description: 'ID of Resource'
+          type: integer
+          example: 1
+        resource_uuid:
+          description: 'External UUID for Resource'
+          type: string
+          example: 'abcf0a64-7e31-22ed-a2eb-6242ac120050'
+        resource_type:
+          description: 'Type of Resource'
+          type: string
+          example: 'filmwork'
+        resource_name:
+          description: 'Name of Resource'
+          type: string
+          example: 'Star Wars III'
+
+    NewResource:
+      type: object
+      required:
+        - resource_uuid
+        - resource_type
+      properties:
+        resource_uuid:
+          description: 'External UUID for resource'
+          type: string
+          example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+        resource_type:
+          description: 'Type of Resource'
+          type: string
+          example: 'filmwork'
+        resource_name:
+          description: 'Name of Resource'
+          type: string
+          example: 'StarWars I'
+        role_id:
+          description: 'Role.id for set permissions for this Resource'
+          type: integer
+          example: 1
+        can_create:
+          description: 'CREATE permissions for this resource'
+          type: boolean
+          example: true
+          default: false
+        can_read:
+          description: 'READ permissions for this resource'
+          type: boolean
+          example: true
+          default: false
+        can_update:
+          description: 'UPDATE permissions for this resource'
+          type: boolean
+          example: true
+          default: false
+        can_delete:
+          description: 'DELETE permissions for this resource'
+          type: boolean
+          example: true
+          default: false
+    UpdateResource:
+      type: object
+      properties:
+        resource_uuid:
+          description: 'External UUID for resource'
+          type: string
+          example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+        resource_type:
+          description: 'Type of Resource'
+          type: string
+          example: 'filmwork'
+        resource_id:
+          description: 'Resource.id'
+          type: integer
+          example: 1
+        new_uuid:
+          description: 'New external UUID for resource'
+          type: string
+          example: 'zxch8h56-7g45-22ed-a2eb-6242ac112350'
+        new_type:
+          description: 'New type for resource'
+          type: string
+          example: 'comment'
+        new_name:
+          description: 'New name for resource'
+          type: string
+          example: 'review'
+    UpdateResourceByPath:
+      type: object
+      properties:
+        resource_id:
+          description: 'Resource.id'
+          type: integer
+          example: 1
+        new_uuid:
+          description: 'New external UUID for resource'
+          type: string
+          example: 'zxch8h56-7g45-22ed-a2eb-6242ac112350'
+        new_type:
+          description: 'New type for resource'
+          type: string
+          example: 'comment'
+        new_name:
+          description: 'New name for resource'
+          type: string
+          example: 'review'
+
+    createdResource:
+      type: object
+      properties:
+        resource:
+          $ref: '#/components/schemas/Resource'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
