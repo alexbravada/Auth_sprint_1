@@ -39,7 +39,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: '#/components/schemas/Permissions'
+                      $ref: '#/components/schemas/checkPermissions'
               '404':
                 description: >-
                   Permissions for this resource not found
@@ -193,7 +193,7 @@ paths:
                 in: query
                 description: 'External UUID for resource'
                 required: false
-                example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
+                example: 'abcf0a64-7e31-22ed-a2eb-6242ac120050'
                 schema:
                   type: string
               - name: resource_type
@@ -363,6 +363,13 @@ paths:
 
 components:
   schemas:
+    checkPermissions:
+      type: object
+      properties:
+        resource:
+          $ref: '#/components/schemas/Resource'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
     Permissions:
       type: object
       properties:
@@ -420,7 +427,7 @@ components:
         resource_uuid:
           description: 'External UUID for resource'
           type: string
-          example: 'abcf0a64-7e31-22ed-a2eb-6242ac120050'
+          example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
         resource_type:
           description: 'Type of Resource'
           type: string
@@ -459,7 +466,7 @@ components:
         resource_uuid:
           description: 'External UUID for resource'
           type: string
-          example: 'abcf0a64-7e31-22ed-a2eb-6242ac120050'
+          example: '011f0a64-7e31-11ed-a1eb-0242ac120002'
         resource_type:
           description: 'Type of Resource'
           type: string

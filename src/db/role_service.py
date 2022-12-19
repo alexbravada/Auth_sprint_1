@@ -5,7 +5,7 @@ from flask import abort
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
 from db.pg_base import PostgresService
-from models.user_model import User, Role, UserRole, Resource, ResourceRole
+from models.user_model import User, Role, Resource, ResourceRole
 from utils.orm_wraps import engine_session
 
 
@@ -90,62 +90,51 @@ class RoleService(PostgresService):
     def user_add_role(self, user_id, role_id, session: sqlalchemy.orm.Session = None):
         try:  # check User model for user_id exist, if not - aborting
             session.query(User).filter(User.id == user_id).one()
-        except NoResultFound:
-            abort(404)
-
-        try:  # check Role model for role_id exist, if not - aborting
             session.query(Role).filter(Role.id == role_id).one()
         except NoResultFound:
             abort(404)
-        try:  # check if relationship user_id__role_id exist in UserRole model, if not - add new
-            session.query(UserRole).filter(UserRole.user_id == user_id,
-                                           UserRole.role_id == role_id).one()
-            abort(400)
-        except MultipleResultsFound:  # this exceptions occurs if UserRole model has multiple identical entries
-            abort(400)
-        except NoResultFound:
-            user_add_role = UserRole()
-            user_add_role.user_id = user_id
-            user_add_role.role_id = role_id
-            session.add(user_add_role)
+        else:
+            session.query(User).filter(User.id == user_id).update({
+                'role_id': role_id,
+                'modified': datetime.utcnow()
+            })
             session.commit()
-            return session.query(UserRole).filter(UserRole.user_id == user_id,
-                                                  UserRole.role_id == role_id).one()
+            return session.query(User).filter(User.id == user_id).one()
 
     @engine_session()
     def user_remove_role(self, user_id, role_id, session: sqlalchemy.orm.Session = None):
         if not user_id or not role_id:  # check if user_id or role_id presented in request
             abort(400)
         try:
-            user_role = session.query(UserRole). \
-                filter(UserRole.user_id == user_id,
-                       UserRole.role_id == role_id).one()
-            session.query(UserRole).filter(UserRole.id == user_role.id).delete()
+            session.query(User).filter(User.id == user_id).one()
+            session.query(Role).filter(Role.id== role_id).one()
+        except NoResultFound:
+            abort(404)
+        else:
+            session.query(User).filter(User.id == user_id).update({
+                'role_id': 1,
+                'modified': datetime.utcnow()
+            })
             session.commit()
-            return user_role
-        except NoResultFound:
-            abort(404)
+            return session.query(User).filter(User.id == user_id).one()
 
-    @engine_session()
-    def user_check_role(self, user_id, session: sqlalchemy.orm.Session = None):
-        try:
-            user_role = session.query(UserRole).filter(UserRole.user_id == user_id).all()
-            if len(user_role) == 0:
-                abort(404)
-            return user_role
-        except NoResultFound:
-            abort(404)
-
-    @engine_session()
-    def role_check_user(self, role_id, session: sqlalchemy.orm.Session = None):
-        try:
-            role_user = session.query(UserRole).filter(UserRole.role_id == role_id).all()
-            if len(role_user) == 0:
-                abort(404)
-            return role_user
-        except NoResultFound:
-            abort(404)
-
-    @engine_session()
-    def user_role_show_all(self, session: sqlalchemy.orm.Session = None):
-        return session.query(UserRole).all()
+    # @engine_session()
+    # def user_check_role(self, user_id, session: sqlalchemy.orm.Session = None):
+    #     try:
+    #         return session.query(User).filter(User.id == user_id).one().as_dict.pop('role_id')
+    #     except NoResultFound:
+    #         abort(404)
+    #
+    # @engine_session()
+    # def role_check_user(self, role_id, session: sqlalchemy.orm.Session = None):
+    #     try:
+    #         role_user = session.query(UserRole).filter(UserRole.role_id == role_id).all()
+    #         if len(role_user) == 0:
+    #             abort(404)
+    #         return role_user
+    #     except NoResultFound:
+    #         abort(404)
+    #
+    # @engine_session()
+    # def user_role_show_all(self, session: sqlalchemy.orm.Session = None):
+    #     return session.query(UserRole).all()

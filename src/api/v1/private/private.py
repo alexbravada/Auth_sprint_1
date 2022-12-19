@@ -68,7 +68,7 @@ def check_permission():
                 'resource': {
                     'resource_uuid': request.args.get('resource_uuid'),
                     'resource_type': request.args.get('resource_type')
-                    },
+                },
                 'permissions': {
                     'role_id': 1,
                     'can_create': False,
@@ -95,7 +95,7 @@ def create_resource():
         abort(400)
 
 
-@private_bp.route('/resources/<str:resource_type>/<str:resource_uuid>', methods=["GET"])
+@private_bp.route('/resources/<string:resource_type>/<string:resource_uuid>', methods=["GET"])
 def read_resource_type_uuid(resource_type, resource_uuid):
     return jsonify(
         ResourceService().show_resource(resource_type=resource_type, resource_uuid=resource_uuid)
@@ -109,12 +109,13 @@ def read_resource_any_params():
     return jsonify(ResourceService().show_resource(**request.args)), HTTPStatus.OK
 
 
-@private_bp.route('/resources/<str:resource_type>/<str:resource_uuid>', methods=["PUT"])
+@private_bp.route('/resources/<string:resource_type>/<string:resource_uuid>', methods=["PUT"])
 def update_resource_type_uuid(resource_type, resource_uuid):
-    if not validation_allowed(request, 'put', ('new_uuid', 'new_type', 'new_name', 'resource_id',)):
+    if not validation_allowed(request, 'put', ('new_uuid', 'new_type', 'new_name',)):
         abort(400)
     if validation_at_least_one(request, 'put', ('new_uuid', 'new_type', 'new_name',)):
-        return jsonify(ResourceService().update_resource(**request.json)), HTTPStatus.OK
+        return jsonify(ResourceService().update_resource(resource_type=resource_type, resource_uuid=resource_uuid,
+                                                         **request.json)), HTTPStatus.OK
     else:
         abort(400)
 
@@ -137,7 +138,7 @@ def update_resource_id():
         abort(400)
 
 
-@private_bp.route('/resources/<str:resource_type>/<str:resource_uuid>', methods=["DELETE"])
+@private_bp.route('/resources/<string:resource_type>/<string:resource_uuid>', methods=["DELETE"])
 def delete_resource_type_uuid(resource_type, resource_uuid):
     return jsonify(ResourceService().delete_resource(
         resource_uuid=resource_uuid, resource_type=resource_type)), HTTPStatus.OK

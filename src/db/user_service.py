@@ -29,13 +29,14 @@ class UserService(PostgresService):
             return {'msg': 'User with that email has been exist'}
         except NoResultFound:
             admin = User(email=email, password=generate_password_hash(password), first_name=first_name,
-                         last_name=last_name, is_admin=True)
+                         last_name=last_name, is_admin=True, role_id=777)
             session.add(admin)
             session.commit()
             return {'msg': 'superuser created'}
 
     @engine_session()
-    def register(self, email, password, first_name=None, last_name=None, session: sqlalchemy.orm.Session = None):
+    def register(self, email, password, first_name=None, last_name=None, role_id: int = 1,
+                 session: sqlalchemy.orm.Session = None):
         try:
             user = session.query(User).filter(User.email == email).one()
             if user:
@@ -44,7 +45,7 @@ class UserService(PostgresService):
             abort(400)
         except NoResultFound:
             user = User(email=email, password=generate_password_hash(password), first_name=first_name,
-                        last_name=last_name)
+                        last_name=last_name, role_id=role_id)
             session.add(user)
             session.commit()
             user = session.query(User).filter(User.email == email).one()
@@ -177,7 +178,7 @@ class UserService(PostgresService):
                     return _login_wo_pass()
 
         except NoResultFound:
-            user = self.register(email=email, password=generate_password_hash(str(random.randint(1, 128))))
+            user = self.register(email=email, password=generate_password_hash(str(random.randint(1, 128))), role_id=1)
             session.add(user)
             session.commit()
             user = session.query(User).filter(User.email == email).one()
@@ -198,7 +199,7 @@ class UserService(PostgresService):
             elif ua_instance.is_bot:
                 return 'bot'
             else:
-                return 'undefined'
+                return 'bot'
         except Exception:
             return None
 

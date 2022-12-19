@@ -3,7 +3,7 @@ from datetime import datetime
 import sqlalchemy.orm
 
 from db.pg_base import PostgresService
-from models.user_model import User, Role, UserRole, Resource, ResourceRole
+from models.user_model import Role, Resource, ResourceRole
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from flask import abort
 
@@ -42,13 +42,17 @@ class ResourceService(PostgresService):
                                            Resource.resource_type == resource_type).one()
         except NoResultFound:
             resource = Resource(resource_uuid=resource_uuid, name=resource_name, resource_type=resource_type)
+            session.add(resource)
+            session.commit()
+            resource = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
+                                                      Resource.resource_type == resource_type).one()
             permission = ResourceRole(resource_id=resource.id,
                                       role_id=role_id,
                                       can_create=can_create,
                                       can_read=can_read,
                                       can_update=can_update,
                                       can_delete=can_delete)
-            session.add(resource, permission)
+            session.add(permission)
             session.commit()
             resource = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
                                                       Resource.resource_type == resource_type).one()
@@ -116,53 +120,54 @@ class ResourceService(PostgresService):
                         new_type: str = None,
                         new_name: str = None,
                         session: sqlalchemy.orm.Session = None) -> dict:
-        def by_uuid_type():
+        def by_uuid_type() -> dict:
             try:
-                row = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
-                                                     Resource.resource_type == resource_type).one()
+                resource_row = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
+                                                              Resource.resource_type == resource_type).one()
             except NoResultFound:
                 abort(404)
             else:
-                id = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
-                                                    Resource.resource_type == resource_type).one().id
+                res_id = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
+                                                    Resource.resource_type == resource_type).one().as_dict
+                res_id = res_id.get('id')
                 session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
                                                Resource.resource_type == resource_type).update(
                     {
-                        'resource_uuid': new_uuid if new_uuid else row.resource_uuid,
-                        'resource_type': new_type if new_type else row.resource_type,
-                        'name': new_name if new_name else row.name,
+                        'resource_uuid': new_uuid if new_uuid else resource_row.resource_uuid,
+                        'resource_type': new_type if new_type else resource_row.resource_type,
+                        'name': new_name if new_name else resource_row.name,
                         'modified': datetime.utcnow() if new_uuid or new_type or new_name else None
                     }
                 )
                 session.commit()
-                return session.query(Resource).filter(Resource.id == id).one().as_dict
+                return session.query(Resource).filter(Resource.id == res_id).one().as_dict
 
-            def by_id():
-                try:
-                    row = session.query(Resource).filter(Resource.id == resource_id).one()
-                except NoResultFound:
-                    abort(404)
-                else:
-                    session.query(Resource).filter(Resource.id == resource_id).update(
-                        {
-                            'resource_uuid': new_uuid if new_uuid else row.resource_uuid,
-                            'resource_type': new_type if new_type else row.resource_type,
-                            'name': new_name if new_name else row.name,
-                            'modified': datetime.utcnow() if new_uuid or new_type or new_name else None
-                        }
-                    )
-                    session.commit()
-                    return session.query(Resource).filter(Resource.id == resource_id).one().as_dict
-
-            if resource_id:
-                return by_id()
-            elif resource_uuid and resource_type:
-                return by_uuid_type()
+        def by_id() -> dict:
+            try:
+                resource_row = session.query(Resource).filter(Resource.id == resource_id).one()
+            except NoResultFound:
+                abort(404)
             else:
-                abort(400)
+                session.query(Resource).filter(Resource.id == resource_id).update(
+                    {
+                        'resource_uuid': new_uuid if new_uuid else resource_row.resource_uuid,
+                        'resource_type': new_type if new_type else resource_row.resource_type,
+                        'name': new_name if new_name else resource_row.name,
+                        'modified': datetime.utcnow() if new_uuid or new_type or new_name else None
+                    }
+                )
+                session.commit()
+                return session.query(Resource).filter(Resource.id == resource_id).one().as_dict
+
+        if resource_id:
+            return by_id()
+        if resource_uuid and resource_type:
+            return by_uuid_type()
+        else:
+            abort(400)
 
     @engine_session()
-    def delete_resource(self, resource_uuid: str, resource_type: str, resource_id: int = None,
+    def delete_resource(self, resource_uuid: str = None, resource_type: str = None, resource_id: int = None,
                         session: sqlalchemy.orm.Session = None) -> dict:
         def by_uuid_type() -> dict:
             try:
@@ -171,14 +176,14 @@ class ResourceService(PostgresService):
             except NoResultFound:
                 abort(404)
             else:
-                row = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
-                                                     Resource.resource_type == resource_type).one()
+                res_row = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
+                                                     Resource.resource_type == resource_type).one().as_dict
 
                 count = session.query(Resource).filter(Resource.resource_uuid == resource_uuid,
                                                        Resource.resource_type == resource_type).delete()
                 if count == 1:
                     session.commit()
-                    return row.as_dict
+                    return res_row
                 else:
                     abort(500)
 
@@ -188,12 +193,12 @@ class ResourceService(PostgresService):
             except NoResultFound:
                 abort(404)
             else:
-                row = session.query(Resource).filter(Resource.id == resource_id).one()
+                res_row = session.query(Resource).filter(Resource.id == resource_id).one().as_dict
 
                 count = session.query(Resource).filter(Resource.id == resource_id).delete()
                 if count == 1:
                     session.commit()
-                    return row.as_dict
+                    return res_row
                 else:
                     abort(500)
 
