@@ -65,6 +65,14 @@ http://localhost/
 - Выход пользователя (помещает переданные токены в блоклист): **POST /api/v1/auth/user/logout**
 - Для валидного refresh-токена возвращает пару токенов access+refresh: **POST /api/v1/auth/refresh**
 
+Авторизация через OAuth2:
+
+- Получение кода авторизации через Yandex: **GET /api/v1/oauth/authorize/yandex**
+- Получение кода авторизации через Google: **GET /api/v1/oauth/authorize/google**
+- Получение кода авторизации через VK: - **GET /api/v1/oauth/authorize/vk**
+- Обмен кода в **/callback** на **access_token & refresh_token происходит внутри сервиса авторизации**
+- Обращение к **GET /api/v1/oauth/authorize/<oauth_service_name> возвращает 2 токена.**
+
 Управление пользователями:
 
 - Обновление логина и пароля пользователя: **PATCH /api/v1/auth/user/**
