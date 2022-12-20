@@ -1,6 +1,6 @@
 Flask==2.2.2
 gevent==22.10.1
-flask-jwt-extended[asymmetric_crypto]
+flask-jwt-extended[asymmetric_crypto]==4.4.4
 SQLAlchemy==1.4.42
 psycopg2-binary==2.9.4
 alembic==1.8.1
@@ -9,8 +9,8 @@ pydantic==1.10.2
 orjson==3.8.1
 redis==4.3.4
 mimesis==6.1.1
-pytest
-requests
+pytest==7.2.0
+requests==2.28.1
 flask-migrate==4.0.0
 pyyaml==6.0
 ua-parser==0.16.1
