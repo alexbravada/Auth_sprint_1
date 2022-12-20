@@ -5,6 +5,7 @@ from mimesis import Person
 
 from conftest import HOST
 
+
 def test_add_role_valid(login_admin):
     mimerand = Person()
     headers = {"Content-Type": "application/json; charset=utf-8",

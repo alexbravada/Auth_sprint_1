@@ -1,8 +1,6 @@
 import requests
 
 
-
-
 def sign_up(email, password):
     #curl -X POST -H "Content-Type: application/json" -d '{"email":"test_user", "password":"123"}' http://127.0.0.1:5000/auth/signup
     url = "http://127.0.0.1:5000/auth/signup"

@@ -8,13 +8,14 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 import click
 
+from flask import Flask
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from config.settings import Settings
 from db.user_service import UserService
 from api import api_blueprint
 
-from flask import Flask
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 SETTINGS = Settings()
 

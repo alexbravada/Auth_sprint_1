@@ -7,6 +7,7 @@ from mimesis import Person
 
 from src.db.role_service import RoleService
 
+
 HOST = 'http://127.0.0.1:80'
 
 @pytest.fixture()
