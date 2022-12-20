@@ -5,6 +5,7 @@ from mimesis import Person
 
 from conftest import HOST
 
+
 def test_signup_valid_data():
     '''
     test with valid autogenerate data

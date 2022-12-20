@@ -3,6 +3,7 @@ import requests
 
 from conftest import HOST
 
+
 def test_show_user_role(login_admin):
     headers = {"Content-Type": "application/json; charset=utf-8",
                "Authorization": f"Bearer {login_admin.get('access_token')}"}

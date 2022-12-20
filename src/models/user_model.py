@@ -8,6 +8,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from config.settings import Settings
 
+
 settings = Settings()
 
 db_connection_string = settings.PG_CONNECT_STRING
@@ -136,17 +137,6 @@ class SocialAccount(DefaultMixin, Base):
 
     def __repr__(self):
         return f'<SocialAccount {self.social_name}:{self.user_id}>'
-
-
-# class UserRole(DefaultMixin, Base):
-#     __tablename__ = 'user__role'
-#     __table_args__ = (UniqueConstraint('user_id', 'role_id', name='user__role_pk'),)
-#
-#     user_id = Column(Integer(), ForeignKey('user_info.id'))
-#     role_id = Column(Integer(), ForeignKey('role.id'))
-#
-#     def __repr__(self):
-#         return f'User_Role(id={self.id!r}, user_id={self.user_id!r}, role_id={self.role_id!r})'
 
 
 class Role(DefaultMixin, Base):

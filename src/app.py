@@ -12,6 +12,7 @@ from config.settings import Settings
 from db.user_service import UserService
 from api import api_blueprint
 
+
 SETTINGS = Settings()
 
 app = Flask(__name__)

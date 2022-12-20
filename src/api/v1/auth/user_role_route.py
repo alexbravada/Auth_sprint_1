@@ -10,6 +10,7 @@ from flask_jwt_extended import jwt_required
 from db.role_service import RoleService
 from .auth_service import admin_required, token_validation
 
+
 user_role_bp = Blueprint('user_role', __name__, url_prefix='/user_role')
 
 
@@ -33,15 +34,6 @@ def body_validate(rrequest):
         abort(400)
 
 
-# @user_role_bp.route('', methods=['GET'])
-# @jwt_required()
-# @admin_required()
-# @token_validation(request)
-# def show_user_role():
-#     db = RoleService()
-#     return jsonify({'user__roles': [x.as_dict for x in db.user_role_show_all()]}), HTTPStatus.OK
-
-
 @user_role_bp.route('/user_role_add', methods=['POST'])
 @jwt_required()
 @admin_required()
@@ -53,24 +45,6 @@ def user_add_role():
                         [db.user_add_role(user_id=request.json.get('user_id'),
                                           role_id=request.json.get('role_id')).as_dict]
                     }), HTTPStatus.CREATED
-
-
-# @user_role_bp.route('/user_role_show/<int:user_id>', methods=['GET'])
-# @jwt_required()
-# @admin_required()
-# @token_validation(request)
-# def user_check_role(user_id):
-#     db = RoleService()
-#     return jsonify({'user__role': [x.as_dict for x in db.user_check_role(user_id)]}), HTTPStatus.OK
-
-
-# @user_role_bp.route('/role_user_show/<int:role_id>', methods=['GET'])
-# @jwt_required()
-# @admin_required()
-# @token_validation(request)
-# def role_check_user(role_id):
-#     db = RoleService()
-#     return jsonify({'role__user': [x.as_dict for x in db.role_check_user(role_id)]}), HTTPStatus.OK
 
 
 @user_role_bp.route('/user_role_delete', methods=['DELETE'])
