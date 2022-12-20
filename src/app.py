@@ -8,6 +8,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 import click
 
+from flask import Flask
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from config.settings import Settings
 from db.user_service import UserService
 from api import api_blueprint
@@ -20,6 +24,14 @@ app.config['JWT_SECRET_KEY'] = 'changeme'
 jwt = JWTManager(app)
 
 app.register_blueprint(api_blueprint)
+
+limiter = Limiter(
+    app, key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour", "1 per minute"],
+    storage_uri="redis://redis-auth:6379",
+    # storage_options={"connect_timeout": 30},
+    strategy="fixed-window",  # or "moving-window"
+)
 
 
 @app.route('/')
