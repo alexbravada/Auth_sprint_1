@@ -1,8 +1,8 @@
+import os
 from datetime import timedelta
 
-from pydantic import BaseSettings, BaseModel, AnyUrl
-import os
 from dotenv import load_dotenv
+from pydantic import BaseSettings, BaseModel, AnyUrl
 
 
 load_dotenv()
@@ -33,6 +33,7 @@ class OAuthCredVK(BaseModel):
     secret: str = os.environ.get('VK_OAUTH_SECRET')
     service_key: str = os.environ.get('VK_OAUTH_SERVICE_KEY')
 
+
 class OAuthCredYandex(BaseModel):
     id: str = os.environ.get('YANDEX_OAUTH_CLIENT_ID')
     secret: str = os.environ.get('YANDEX_OAUTH_CLIENT_SECRET')
@@ -41,6 +42,7 @@ class OAuthCredYandex(BaseModel):
 class OAuthGoogle(BaseModel):
     client_id = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     client_secret = os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET')
+
 
 class Settings(BaseSettings):
     PG: PGDSN = PGDSN()
@@ -53,3 +55,4 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_TTL = timedelta(minutes=10)
     REFRESH_TOKEN_TTL = timedelta(days=30)
     BASE_URL: AnyUrl = os.environ.get('APP_URL')
+    TRACER_ENABLE: bool = os.environ.get('TRACER_ENABLE')

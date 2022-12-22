@@ -1,21 +1,19 @@
+import click
 from flask import Flask, render_template, request
 from flask_jwt_extended import JWTManager
 from flask.cli import with_appcontext
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-import click
-
-from flask import Flask
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 from config.settings import Settings
 from db.user_service import UserService
 from api import api_blueprint
-
 
 SETTINGS = Settings()
 
@@ -49,29 +47,34 @@ def create_admin(email, password):
                       password=password)
 
 
-@app.before_request
-def before_request():
-    request_id = request.headers.get('X-Request-Id')
-    if not request_id:
-        raise RuntimeError('request id is required')
+if SETTINGS.TRACER_ENABLE:
+    @app.before_request
+    def before_request():
+        request_id = request.headers.get('X-Request-Id')
+        if not request_id:
+            raise RuntimeError('request id is required')
 
 
-def configure_tracer() -> None:
-    jaegersettings = SETTINGS.Jaeger.dict()
-    trace.set_tracer_provider(TracerProvider())
-    trace.get_tracer_provider().add_span_processor(
-        BatchSpanProcessor(
-            JaegerExporter(
-                agent_host_name=jaegersettings.get('host'),
-                agent_port=jaegersettings.get('port'),
+    def configure_tracer() -> None:
+        jaegersettings = SETTINGS.Jaeger.dict()
+        resource = Resource(attributes={
+            SERVICE_NAME: 'auth-service'
+        })
+        provider = TracerProvider(resource=resource)
+        trace.set_tracer_provider(provider)
+        trace.get_tracer_provider().add_span_processor(
+            BatchSpanProcessor(
+                JaegerExporter(
+                    agent_host_name=jaegersettings.get('host'),
+                    agent_port=jaegersettings.get('port'),
+                )
             )
         )
-    )
-    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+        trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
 
-configure_tracer()
-FlaskInstrumentor().instrument_app(app)
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
 
 app.cli.add_command(create_admin)
 

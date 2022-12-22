@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy import Column, MetaData, create_engine, or_, UniqueConstraint, PrimaryKeyConstraint, event
 from sqlalchemy import Integer, String, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.orm import declarative_base, backref, relationship
 from sqlalchemy.ext.declarative import declared_attr
@@ -10,7 +10,6 @@ from config.settings import Settings
 
 
 settings = Settings()
-
 db_connection_string = settings.PG_CONNECT_STRING
 engine = create_engine(
     db_connection_string,
@@ -20,38 +19,6 @@ engine = create_engine(
 
 Base = declarative_base()
 metadata_obj = MetaData()
-
-
-def create_partition_by_social_provider(target, connection, **kw) -> None:
-    """ creating partition by user_sign_in """
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "social_account_vk" PARTITION OF "social_account" FOR VALUES IN ('VK')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "social_account_yandex" PARTITION OF "social_account" FOR VALUES IN ('YANDEX')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "social_account_google" PARTITION OF "social_account" FOR VALUES IN ('GOOGLE')"""
-    )
-
-
-def create_partition_by_device(target, connection, **kw) -> None:
-    """ creating partition by user_sign_in """
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "login_history_smart" PARTITION OF "login_history" FOR VALUES IN ('smart')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "login_history_mobile" PARTITION OF "login_history" FOR VALUES IN ('mobile')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "login_history_tablet" PARTITION OF "login_history" FOR VALUES IN ('tablet')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "login_history_pc" PARTITION OF "login_history" FOR VALUES IN ('pc')"""
-    )
-    connection.execute(
-        """CREATE TABLE IF NOT EXISTS "login_history_bot" PARTITION OF "login_history" FOR VALUES IN ('bot')"""
-    )
 
 
 class DefaultMixin:
@@ -74,7 +41,6 @@ class LoginRecord(DefaultMixin, Base):
         UniqueConstraint('id', 'device_type'),
         {
             'postgresql_partition_by': 'LIST (device_type)',
-            'listeners': [('after_create', create_partition_by_device)],
         }
     )
     login_time = Column(DateTime(), nullable=False)
@@ -126,7 +92,6 @@ class SocialAccount(DefaultMixin, Base):
                       UniqueConstraint('id', 'social_name'),
                       {
                           'postgresql_partition_by': 'LIST (social_name)',
-                          'listeners': [('after_create', create_partition_by_social_provider)],
                       }
                       )
 
@@ -173,6 +138,3 @@ class Resource(DefaultMixin, Base):
     name = Column(String(250), nullable=True)
 
     roles = relationship('ResourceRole', backref='resource', cascade='all, delete-orphan', passive_deletes=True)
-
-
-Base.metadata.create_all(bind=engine)
