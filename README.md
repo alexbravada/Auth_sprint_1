@@ -1,6 +1,6 @@
 Ссылка на проект https://github.com/alexbravada/Auth_sprint_1
 Участники @npocbet, @paQQuete, @alexbravada
-# Проектная работа 6 спринта
+# Проектная работа 7 спринта
 
 ## Взаимодействие с другими сервисами
 
