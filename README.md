@@ -13,17 +13,20 @@
 ## Запуск проекта:
 
 1. Создаем файл .env на основе .env_example (копируем и редактируем)
-2. Запускаем создание докер-образа:
+2. Запускаем сборку и старт проекта:
 
-```
+```shell
 docker-compose up --build  
 ```
+3. Применяем миграции:
+```shell
+docker exec service-auth alembic upgrade head
+```
 
-
-3. ОПЦИОНАЛЬНО: Создаем суперпользователя. Нужно зайти в контейнер с Flask и запустить консольную команду (не забудьте
+4. ОПЦИОНАЛЬНО: Создаем суперпользователя. Нужно зайти в контейнер с Flask и запустить консольную команду (не забудьте
    указать свой емэйл и пароль)
 
-```
+```shell
 docker exec -it auth_sprint_1 bash
 python3 -m flask create-superuser your@email.com yourpassword123
 ```
@@ -67,11 +70,10 @@ http://localhost/
 
 Авторизация через OAuth2:
 
-- Получение кода авторизации через Yandex: **GET /api/v1/oauth/authorize/yandex**
-- Получение кода авторизации через Google: **GET /api/v1/oauth/authorize/google**
-- Получение кода авторизации через VK: - **GET /api/v1/oauth/authorize/vk**
-- Обмен кода в **/callback** на **access_token & refresh_token происходит внутри сервиса авторизации**
-- Обращение к **GET /api/v1/oauth/authorize/<oauth_service_name> возвращает 2 токена.**
+- Получение JWT токенов auth сервиса через Yandex с помощью OAuth2: **GET /api/v1/oauth/authorize/yandex**
+- Получение JWT токенов auth сервиса через Google с помощью OAuth2: **GET /api/v1/oauth/authorize/google**
+- Получение JWT токенов auth сервиса через VK с помощью OAuth2 : - **GET /api/v1/oauth/authorize/vk**
+- Обмен кода от провайдера данных на acees_token и данные (провайдера) и дальнейший их обмен на **access_token & refresh_token** происходит внутри сервиса авторизации
 
 Управление пользователями:
 
