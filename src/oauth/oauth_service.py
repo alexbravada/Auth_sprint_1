@@ -25,10 +25,9 @@ class OAuthAbstract(ABC):
 class VKOAuth(OAuthAbstract):
     def __init__(self):
         super().__init__()
-        self.settings = SETTINGS.VK.dict()
-        self.app_id = self.settings.get('id')
-        self.secret = self.settings.get('secret')
-        self.service_key = self.settings.get('service_key')
+        self.app_id = SETTINGS.VK.id
+        self.secret = SETTINGS.VK.secret
+        self.service_key = SETTINGS.VK.service_key
         self.redirect_uri = f'{SETTINGS.BASE_URL}/api/v1/oauth/callback/vk'
         self.authorize_url = f'https://oauth.vk.com/authorize?client_id={self.app_id}' \
                              f'&redirect_uri={self.redirect_uri}' \
@@ -55,9 +54,8 @@ class VKOAuth(OAuthAbstract):
 class YandexOAuth(OAuthAbstract):
     def __init__(self):
         super().__init__()
-        self.settings = SETTINGS.Yandex.dict()
-        self.app_id = self.settings.get('id')
-        self.secret = self.settings.get('secret')
+        self.app_id = SETTINGS.Yandex.id
+        self.secret = SETTINGS.Yandex.secret
         self.redirect_uri = f'{SETTINGS.BASE_URL}/api/v1/oauth/callback/yandex'
         self.authorize_url = f'https://oauth.yandex.ru/authorize?client_id={self.app_id}' \
                              f'&display=popup&response_type=code&state=yandex'
@@ -91,9 +89,8 @@ class YandexOAuth(OAuthAbstract):
 class GoogleOAuth(OAuthAbstract):
     def __init__(self):
         super().__init__()
-        self.settings = SETTINGS.Google.dict()
-        self.client_id = self.settings.get('client_id')
-        self.client_secret = self.settings.get('client_secret')
+        self.client_id = SETTINGS.Google.client_id
+        self.client_secret = SETTINGS.Google.client_secret
         self.redirect_uri = f'{SETTINGS.BASE_URL}/api/v1/oauth/callback/google'
         self.scope = 'email profile openid'
         self.authorize_url = f'https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&' \

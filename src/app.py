@@ -26,7 +26,7 @@ app.register_blueprint(api_blueprint)
 limiter = Limiter(
     app, key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour", "1 per minute"],
-    storage_uri="redis://redis-auth:6379",
+    storage_uri=SETTINGS.REDIS_URL,
     # storage_options={"connect_timeout": 30},
     strategy="fixed-window",  # or "moving-window"
 )

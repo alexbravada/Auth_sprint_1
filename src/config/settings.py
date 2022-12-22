@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     Yandex: OAuthCredYandex = OAuthCredYandex()
     Google: OAuthGoogle = OAuthGoogle()
     PG_CONNECT_STRING: AnyUrl = f'postgresql+psycopg2://{PG.user}:{PG.password}@{PG.host}:{PG.port}/{PG.dbname}'
+    redis_compose_hostname: str = os.environ.get('COMPOSE_HOSTNAME')
+    REDIS_URL: AnyUrl = f'redis://{redis_compose_hostname}:{Redis.port}'
     ACCESS_TOKEN_TTL = timedelta(minutes=10)
     REFRESH_TOKEN_TTL = timedelta(days=30)
     BASE_URL: AnyUrl = os.environ.get('APP_URL')
