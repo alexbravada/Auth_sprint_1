@@ -7,7 +7,7 @@ from flask import make_response
 from flask import abort
 from flask_jwt_extended import jwt_required
 
-from db.role_service import RoleService
+from services.role_service import RoleService
 from .auth_service import admin_required, token_validation
 
 

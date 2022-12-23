@@ -2,7 +2,7 @@ from datetime import datetime
 
 import sqlalchemy.orm
 
-from db.pg_base import PostgresService
+from services.pg_base import PostgresService
 from models.user_model import Role, Resource, ResourceRole
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from flask import abort

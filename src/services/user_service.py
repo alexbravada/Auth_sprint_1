@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import abort
 from user_agents import parse as ua_parse
 
-from db.pg_base import PostgresService
+from services.pg_base import PostgresService
 from models.user_model import User, LoginRecord, SocialAccount, Role, ResourceRole, Resource
 from models.pydantic_classes import UserOutput
 from utils.jaeger_wraps import trace

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from oauth import oauth_service
+from services import oauth_service
 
 authorize_bp = Blueprint('authorize', __name__, url_prefix='/authorize')
 

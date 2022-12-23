@@ -12,7 +12,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 from config.settings import Settings
-from db.user_service import UserService
+from services.user_service import UserService
 from api import api_blueprint
 
 SETTINGS = Settings()
@@ -23,13 +23,13 @@ jwt = JWTManager(app)
 
 app.register_blueprint(api_blueprint)
 
-limiter = Limiter(
-    app, key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour", "1 per minute"],
-    storage_uri=SETTINGS.REDIS_URL,
-    # storage_options={"connect_timeout": 30},
-    strategy="fixed-window",  # or "moving-window"
-)
+# limiter = Limiter(
+#     app, key_func=get_remote_address,
+#     default_limits=["200 per day", "50 per hour", "1 per minute"],
+#     storage_uri=SETTINGS.REDIS_URL,
+#     # storage_options={"connect_timeout": 30},
+#     strategy="fixed-window",  # or "moving-window"
+# )
 
 
 @app.route('/')

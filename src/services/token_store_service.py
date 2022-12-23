@@ -3,8 +3,8 @@ import time
 from functools import lru_cache
 
 import redis
-from db.redis_base import AbstractCacheStorage
-from db.redis_base import get_redis
+from services.redis_base import AbstractCacheStorage
+from services.redis_base import get_redis
 
 
 class TokenStoreService:

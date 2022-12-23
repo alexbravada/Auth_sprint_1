@@ -6,7 +6,7 @@ import requests
 from flask import redirect
 
 from config.settings import Settings
-from db.user_service import UserService
+from services.user_service import UserService
 from utils.jaeger_wraps import trace
 
 SETTINGS = Settings()

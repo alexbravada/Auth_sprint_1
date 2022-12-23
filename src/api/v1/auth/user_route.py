@@ -7,9 +7,9 @@ from flask import make_response
 from flask import abort
 from flask_jwt_extended import jwt_required, get_jwt
 
-from db.user_service import UserService
-from db.redis_base import AbstractCacheStorage
-from db.token_store_service import get_token_store_service
+from services.user_service import UserService
+from services.redis_base import AbstractCacheStorage
+from services.token_store_service import get_token_store_service
 from .auth_service import create_login_tokens, logout_service, \
     logout_all_service, token_validation, blacklisting_tokens
 

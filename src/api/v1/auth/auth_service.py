@@ -8,7 +8,7 @@ from flask_jwt_extended import get_jwt
 from flask_jwt_extended import verify_jwt_in_request
 from flask_jwt_extended import create_access_token, create_refresh_token
 
-from db.token_store_service import AbstractCacheStorage, get_token_store_service
+from services.token_store_service import AbstractCacheStorage, get_token_store_service
 
 
 def admin_required():

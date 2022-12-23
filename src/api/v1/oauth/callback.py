@@ -4,7 +4,7 @@ from flask import Blueprint
 from flask import request
 from flask import jsonify
 
-from oauth import oauth_service
+from services import oauth_service
 
 callback_bp = Blueprint('callback', __name__, url_prefix='/callback')
 

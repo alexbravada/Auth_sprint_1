@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import Blueprint, make_response, request, jsonify, abort
 from sqlalchemy.exc import OperationalError
 
-from db.resource_service import ResourceService
+from services.resource_service import ResourceService
 
 private_bp = Blueprint('callback', __name__, url_prefix='/')
 

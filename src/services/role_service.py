@@ -4,7 +4,7 @@ import sqlalchemy.orm
 from flask import abort
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.pg_base import PostgresService
+from services.pg_base import PostgresService
 from models.user_model import User, Role, Resource, ResourceRole
 from utils.orm_wraps import engine_session
 
