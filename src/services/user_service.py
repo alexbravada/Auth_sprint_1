@@ -202,9 +202,11 @@ class UserService(PostgresService):
                     'last_name': user['last_name'],
                     'is_verified': user['is_verified']
                 })
-                return output
+
             except NoResultFound:
                 abort(404)
+        return output
+
 
     @staticmethod
     def _device_type(useragent: str) -> str | None:
