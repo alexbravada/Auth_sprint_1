@@ -4,6 +4,7 @@ from flask import Blueprint, make_response, request, jsonify, abort
 from sqlalchemy.exc import OperationalError
 
 from services.resource_service import ResourceService
+from services.user_service import UserService
 
 private_bp = Blueprint('callback', __name__, url_prefix='/')
 
@@ -153,3 +154,8 @@ def delete_resource_id():
         return jsonify(ResourceService().delete_resource(**request.args)), HTTPStatus.OK
     else:
         abort(400)
+
+
+@private_bp.route('/userinfo/<int:start_offset>/<int:end_offset>', methods=["GET"])
+def get_user_info_batch(start_offset, end_offset):
+    return jsonify(UserService().get_users_info(start_offset, end_offset), HTTPStatus.OK)

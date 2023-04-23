@@ -186,6 +186,26 @@ class UserService(PostgresService):
             _login_rec(user_id=user.id)
             return _login_wo_pass()
 
+
+    @engine_session()
+    def get_users_info(self, start_id: int, end_id: int, session: Session = None) -> list[dict]:
+        output = list()
+        for user_id in range(start_id, end_id + 1):
+            try:
+                user = session.query(User).filter(User.id == user_id).one()
+                user = user.as_dict()
+                output.append({
+                    'id': user['id'],
+                    'email': user['email'],
+                    'username': user['username'],
+                    'first_name': user['first_name'],
+                    'last_name': user['last_name'],
+                    'is_verified': user['is_verified']
+                })
+                return output
+            except NoResultFound:
+                abort(404)
+
     @staticmethod
     def _device_type(useragent: str) -> str | None:
         try:
@@ -209,3 +229,5 @@ class UserService(PostgresService):
         for column in row.__table__.columns:
             d[column.name] = getattr(row, column.name)
         return d
+
+
