@@ -5,10 +5,10 @@ import requests
 import pytest
 from mimesis import Person
 
-from src.db.role_service import RoleService
+from services.role_service import RoleService
 
 
-HOST = 'http://127.0.0.1:80'
+HOST = 'http://ctube-study:80'
 
 @pytest.fixture()
 def login() -> dict:

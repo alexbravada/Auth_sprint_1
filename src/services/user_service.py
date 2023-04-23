@@ -193,7 +193,7 @@ class UserService(PostgresService):
         for user_id in range(start_id, end_id + 1):
             try:
                 user = session.query(User).filter(User.id == user_id).one()
-                user = user.as_dict()
+                user = user.as_dict
                 output.append({
                     'id': user['id'],
                     'email': user['email'],
