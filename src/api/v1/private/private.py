@@ -158,4 +158,4 @@ def delete_resource_id():
 
 @private_bp.route('/userinfo/<int:start_offset>/<int:end_offset>', methods=["GET"])
 def get_user_info_batch(start_offset, end_offset):
-    return jsonify(UserService().get_users_info(start_offset, end_offset), HTTPStatus.OK)
+    return jsonify(UserService().get_users_info(start_offset, end_offset)), HTTPStatus.OK
